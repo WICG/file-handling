@@ -43,15 +43,14 @@ The following event is sent to a service worker when a user requests that a web 
 
     interface FileEvent : ExtendableEvent {
       readonly attribute DOMString name;
-      sequence<FileEntry> files;
+      sequence<FileSystemFileHandle> files;
     }
 
 The "name" is the name of the file handler.
 
 If the user selects two CSV files and three SVG files, and requests that Grafr open them, two FileEvent instances will be created and sent to the service worker: one for the CSV files and one for the SVG files.
 
-Each [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) allows reading, seeking and editing the file.
-
+Each [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
 
 
 The service worker should register a listener to process file events.
