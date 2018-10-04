@@ -21,11 +21,11 @@ The following web application declares in its manifest that is handles CSV and S
       "file_handling": [
         {
           "name": "raw",
-          "accept": ".csv, text/csv"
+          "accept": [".csv", "text/csv"]
         },
         {
           "name": "graph",
-          "accept": ".svg, image/svg+xml"
+          "accept": [".svg", "image/svg+xml"]
         }
       ]
     }
@@ -34,7 +34,7 @@ On platforms that only use file extensions to describe file types, user agents c
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype.
 
-Each accept string is a comma-separated set of MIME types and/or file extensions.
+Each accept entry is a sequence of MIME types and/or file extensions.
 
 
 
