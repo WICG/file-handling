@@ -43,26 +43,17 @@ The user can right click on CSV or SVG files in the operating system's file brow
 
 A new top level browsing context is created, navigating to the file handling url, e.g. grafr.com/file-open
 
-A ForegroundEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the window, allowing the web application to read and update the files.
+A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the window, allowing the web application to read and update the files.
 
-### Single Tab Application
+### Single Tab Application (context for the LaunchEvent name)
 
-Suppose the user keeps the Grafr web application open, and now switches to the operating system's file browser and chooses more files to open in Grafr. Grafr might prefer for the new ForegroundEvent, with the additional files, to be sent to the existing Grafr window.
+Suppose the user keeps the Grafr web application open, and now switches to the operating system's file browser and chooses more files to open in Grafr. Grafr might prefer for the new LaunchEvent, with the additional files, to be sent to the existing Grafr window.
 
-The desire for single tab applications also arises in contexts that don't involve file handling. An earlier proposal for supporting single tab applications, and much more, is [Service Worker Launch Events](https://github.com/WICG/sw-launch/blob/master/explainer.md).
+The desire for single tab applications also arises in contexts that don't involve file handling. A general proposal for supporting single tab applications, and much more, is discussed in [SW-Launch](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
-A declarative approach that avoids new Service Worker events would add a member to the manifest, e.g.
+Suppose Grafr is using SW-Launch. Whenever the user navigates to Grafr from another web site, and Grapr is already open in another window, that window would receive the focus, and there would be a LaunchEvent with the incoming Request (url, form parameters etc.).
 
-    {
-      "name": "Grafr",
-      "tabs": "single"
-    }
-
-Whenever the user navigates to Grafr from another web site, and Grapr is already open in another window, that window would receive the focus and a ForegroundEvent with the incoming Request (url, form parameters etc.).
-
-Similarly, if the user right clicks on CSV or SVG files in the operating system's file browser, and requests they be opened in Grafr, the existing Grapr window would receive a ForegroundEvent with the new files.
-
-This will be formalised in a separate proposal. We mention it here to explain the motivation for the naming of ForegroundEvent.
+Similarly, if the user right clicks on CSV or SVG files in the operating system's file browser, and requests they be opened in Grafr, the existing Grapr window would receive the focus, and there would be a LaunchEvent with the new files.
 
 Grafr need not receive two separate events: one for the open_url Request and one with the files.
 
