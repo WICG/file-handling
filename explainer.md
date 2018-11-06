@@ -18,26 +18,37 @@ The following web application declares in its manifest that is handles CSV and S
 
     {
       "name": "Grafr",
-      "file_handling": [
-        {
-          "name": "raw",
-          "accept": [".csv", "text/csv"]
-        },
-        {
-          "name": "graph",
-          "accept": [".svg", "image/svg+xml"]
-        }
-      ]
+      "file_handling": {
+        "open_url": "/file-open",
+        "files": [
+          {
+            "name": "raw",
+            "accept": [".csv", "text/csv"]
+          },
+          {
+            "name": "graph",
+            "accept": [".svg", "image/svg+xml"]
+          }
+        ]
+      }
     }
-
-On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv" and ".svg".
-
-On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype.
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
+On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv" and ".svg".
 
+On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
 
+The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
+
+A new top level browsing context is created, navigating to the file handling url, e.g. grafr.com/file-open
+
+A ForegroundEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the window, allowing the web application to read and update the files.
+
+### Obsolete Proposal
+
+##### This proposal with new service worker events was presented to the Service Worker and Web Platform working groups at TPAC 2018. #####
+##### There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code if no client window has been given the focus yet. #####
 
 The following event is sent to a service worker when a user requests that a web application be used to open file(s).
 
