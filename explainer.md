@@ -45,10 +45,31 @@ A new top level browsing context is created, navigating to the file handling url
 
 A ForegroundEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the window, allowing the web application to read and update the files.
 
+### Single Tab Application
+
+Suppose the user keeps the Grafr web application open, and now switches to the operating system's file browser and chooses more files to open in Grafr. Grafr might prefer for the new ForegroundEvent, with the additional files, to be sent to the existing Grafr window.
+
+The desire for single tab applications also arises in contexts that don't involve file handling. An earlier proposal for supporting single tab applications, and much more, is [Service Worker Launch Events](https://github.com/WICG/sw-launch/blob/master/explainer.md).
+
+A declarative approach that avoids new Service Worker events would add a member to the manifest, e.g.
+
+    {
+      "name": "Grafr",
+      "tabs": "single"
+    }
+
+Whenever the user navigates to Grafr from another web site, and Grapr is already open in another window, that window would receive the focus and a ForegroundEvent with the incoming Request (url, form parameters etc.).
+
+Similarly, if the user right clicks on CSV or SVG files in the operating system's file browser, and requests they be opened in Grafr, the existing Grapr window would receive a ForegroundEvent with the new files.
+
+This will be formalised in a separate proposal. We mention it here to explain the motivation for the naming of ForegroundEvent.
+
+Grafr need not receive two separate events: one for the open_url Request and one with the files.
+
 ### Obsolete Proposal
 
-##### This proposal with new service worker events was presented to the Service Worker and Web Platform working groups at TPAC 2018. #####
-##### There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code if no client window has been given the focus yet. #####
+##### This proposal with new service worker events was presented to the Service Worker and Web Platform working groups at TPAC 2018.
+##### There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code if no client window has been given the focus yet.
 
 The following event is sent to a service worker when a user requests that a web application be used to open file(s).
 
