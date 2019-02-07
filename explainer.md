@@ -18,7 +18,7 @@ The following web application declares in its manifest that is handles CSV and S
 
     {
       "name": "Grafr",
-      "file_handling": {
+      "file_handler": {
         "open_url": "/file-open",
         "files": [
           {
