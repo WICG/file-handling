@@ -16,22 +16,21 @@ There has historically been no standards-track API for MIME type handling. For s
 
 The following web application declares in its manifest that is handles CSV and SVG files.
 
+```json
     {
       "name": "Grafr",
-      "file_handler": {
-        "open_url": "/file-open",
-        "files": [
-          {
-            "name": "raw",
-            "accept": [".csv", "text/csv"]
-          },
-          {
-            "name": "graph",
-            "accept": [".svg", "image/svg+xml"]
-          }
-        ]
-      }
+      "file_handler": [
+        {
+          "name": "raw",
+          "accept": [".csv", "text/csv"]
+        },
+        {
+          "name": "graph",
+          "accept": [".svg", "image/svg+xml"]
+        }
+      ]
     }
+```
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
@@ -41,9 +40,40 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-A new top level browsing context is created, navigating to the file handling url, e.g. grafr.com/file-open
+A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the service worker, allowing the web application to decide where to open the files (i.e. in a new or existing client).
 
-A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the window, allowing the web application to read and update the files.
+```js
+  self.addEventListener('file', event => {
+    event.waitUntil(async () => {
+      const allClients = await clients.matchAll();
+      // If there isn't one available, open a window.
+      if (allClients.length === 0) {
+        const client = clients.openWindow('/');
+        client.postMessage(event.files);
+        client.focus();
+        return;
+      }
+
+      const client = allClients[0];
+      client.postMessage(event.files);
+      client.focus();
+    }());
+  });
+```
+
+`event` has the following shape.
+
+```webidl
+  interface LaunchEvent : ExtendableEvent {
+    readonly attribute DOMString name;
+    sequence<FileSystemFileHandle> files;
+  }
+```
+
+`name` is the name of the file handler, as defined in the web app manifest. If the user selects files files with different handlers (e.g. a CSV and SVG file, in the case of Graphr), one LaunchEvent will be fired for each handler (though a handler could receive multiple files).
+
+
+A [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
 
 ### Single Tab Application (context for the LaunchEvent name)
 
@@ -57,40 +87,48 @@ Similarly, if the user right clicks on CSV or SVG files in the operating system'
 
 Grafr need not receive two separate events: one for the open_url Request and one with the files.
 
-### Obsolete Proposal
+### Concerns
 
-##### This proposal with new service worker events was presented to the Service Worker and Web Platform working groups at TPAC 2018.
-##### There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code if no client window has been given the focus yet.
+This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet.
 
-The following event is sent to a service worker when a user requests that a web application be used to open file(s).
+A different API, was considered with flow similar to the following:
+1. If no window exists, create a new one
+2. Fire launch event on first active window
 
-    interface FileEvent : ExtendableEvent {
-      readonly attribute DOMString name;
-      sequence<FileSystemFileHandle> files;
-    }
+However, this API would require jumping through some hoops in common cases. Consider a document editor:
+1. A user is editing document1.doc
+2. User then opens document2.doc
+   1. A launch event on document1.doc is fired
+   2. As the editor doesn't want to lost the changes to document1, a message is posted to the service worker.
+      1. The service worker checks to see if document2.doc is already open
+         1. If yes, focus that window
+         2. If no, create a new client, post it the document and focus the client.
 
-The "name" is the name of the file handler.
+Compare to having the event on the service worker, where we can cut out the first postMessage
+1. A user is editing document1.doc
+2. User then opens document2.doc
+   1. A launch event is fired on the service worker
+      1. The service worker checks to see if document2 is already open
+         1. If yes, focus that window
+         2. If no, create a new client, post it the document and focus the client.
 
-If the user selects two CSV files and three SVG files, and requests that Grafr open them, two FileEvent instances will be created and sent to the service worker: one for the CSV files and one for the SVG files.
+Which API is better depends largely on what the more common case is likely to be:
+1. Opening the file in an existing Window
+   - Note: This only seems to make sense in apps that can only have one instance, otherwise the existing window the browser picks is likely to be fairly arbitrary.
+2. Opening the file in a new window
 
-Each [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
+Arguably, the second case is more common on current desktop operating systems. 
+#### Microsoft Office
+Opens each doc in a different window
 
+#### MS Paint
+Opens each image in a new window
 
-The service worker should register a listener to process file events.
+#### Preview on OSX
+Only ever has one file open at a time (arguably a special case, and not likely to work on the web)
 
-    self.addEventListener('file', event => {
-      event.waitUntil(async () => {
-        const allClients = await clients.matchAll();
-        // If there isn't one available, open a window.
-        if (allClients.length === 0) {
-          const client = clients.openWindow('/');
-          client.postMessage(event.files);
-          client.focus();
-          return;
-        }
+#### Microsoft Visual Studio
+Each project is opens a new instance of Visual Studio
 
-        const client = allClients[0];
-        client.postMessage(event.files);
-        client.focus();
-      }());
-    });
+#### VS Code
+Files trigger a new tab in the last active window, folders result in a new instance
