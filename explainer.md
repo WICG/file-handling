@@ -64,7 +64,7 @@ A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WI
 `event` has the following shape.
 
 ```webidl
-  interface FileEvent : ExtendableEvent {
+  interface LaunchEvent : ExtendableEvent {
     readonly attribute DOMString name;
     sequence<FileSystemFileHandle> files;
   }
