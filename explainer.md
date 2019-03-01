@@ -91,6 +91,18 @@ Grafr need not receive two separate events: one for the open_url Request and one
 
 This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet.
 
+#### Potential Mitigations
+
+##### Slowness
+If the browser isn't open, the time to spin up the ServiceWorker is likely to be fairly small compared to the amount of time we'll need to spin up the browser, so it probably won't have much effect on this case. The one we're really concerned about is when the browser/app are open when we fire off the event and nothing happens. It still seems like this time is probably not going to be that significant compared to the I/O required to actually open the file.
+
+Another potential cause of slowness would be that developers decide to do some heavy pre-processing in the ServiceWorker, before starting a client, so users don't get immediate feedback that something is happening. We could reduce this by putting a small timeout on the LaunchEvent (say, 1 second), which would encourage developers to pass on the FileHandle as quickly as possible.
+
+##### Silence
+In order to ensure that users actually see something happen we could make it a requirement that client.focus() is called in a FileHandler, and, if it is not, the browser selects an open client, or opens a new client. In addition, a UserAgent could choose to black list apps that don't open a client, to discourage bad behavior.
+
+---------------------------------------
+
 A different API, was considered with flow similar to the following:
 1. If no window exists, create a new one
 2. Fire launch event on first active window
