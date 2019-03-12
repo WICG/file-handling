@@ -87,60 +87,39 @@ Similarly, if the user right clicks on CSV or SVG files in the operating system'
 
 Grafr need not receive two separate events: one for the open_url Request and one with the files.
 
-### Concerns
+### ServiceWorker Event Vs. Client Event
 
-This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet.
+This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet. There is further discussion in issue #3.
 
-#### Potential Mitigations
+The below tables compares handling launch events in the service worker and in a client.
+|          | ServiceWorker                                                                                                                                                                          | Launch Event                                                                                                                               |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| The Good | - There is an existing API for managing clients<br>- Can choose what window to open file in<br>- Can handle event without having to open a client (e.g. torrent file, read file later) | - Something will always happen<br>- As fast as possible                                                                                    |
+| The Bad  | - Could silently swallow a launch event<br>- Might be slow (a la fetch)<br>- Not clear which service worker should handle the event                                                    | - Have to proxy through the service worker to handle event in a different client<br>- A client has to be opened before handling can begin. |
+Based on this table, it seems that service workers are a more natural place for the launch event handler to live, the main objections concerning speed and bad behavior by a handler, rather than ergonomics. Fortunately, it should be possible to mitigate these concerns through careful API design.
 
-##### Slowness
-If the browser isn't open, the time to spin up the ServiceWorker is likely to be fairly small compared to the amount of time we'll need to spin up the browser, so it probably won't have much effect on this case. The one we're really concerned about is when the browser/app are open when we fire off the event and nothing happens. It still seems like this time is probably not going to be that significant compared to the I/O required to actually open the file.
+#### Mitigating Slowness
+A small timeout could be applied to the launch event (i.e. one second), to force sites to provide meaningful feedback as quickly as possible. However, this only addresses half the concern. There are worries that going through the ServiceWorker is inherently slow, due to all the IPC calls. However, for one off launch events, it seems likely that this time will be negligible when compared to the time required to start/load a new instance of the site, and to perform I/O to open the file.
 
-Another potential cause of slowness would be that developers decide to do some heavy pre-processing in the ServiceWorker, before starting a client, so users don't get immediate feedback that something is happening. We could reduce this by putting a small timeout on the LaunchEvent (say, 1 second), which would encourage developers to pass on the FileHandle as quickly as possible.
+#### Providing Feedback
+not-a-great-experience.com (after being installed) could register itself as a handler for a number of files, and not do anything when they are opened, essentially failing silently. We could completely remove this case by enforcing that either:
 
-##### Silence
-In order to ensure that users actually see something happen we could make it a requirement that client.focus() is called in a FileHandler, and, if it is not, the browser selects an open client, or opens a new client. In addition, a UserAgent could choose to black list apps that don't open a client, to discourage bad behavior.
+1. A notification is shown and preventDefault is called (for the case of handling the file in the background) or
+2. A client is focused
 
----------------------------------------
+If neither of these conditions are met, the user agent could focus an existing client, or instantiate a new one. This way, we ensure that a user gets some feedback about what is happening. In addition a user agent might choose to blacklist the offending application). Issue #8 is related to this.
 
-A different API, was considered with flow similar to the following:
-1. If no window exists, create a new one
-2. Fire launch event on first active window
+#### Which Service Worker
+An application can potentially have multiple service workers installed under its scope, which makes it difficult to determine which worker should receive the launch event. For example:
 
-However, this API would require jumping through some hoops in common cases. Consider a document editor:
-1. A user is editing document1.doc
-2. User then opens document2.doc
-   1. A launch event on document1.doc is fired
-   2. As the editor doesn't want to lost the changes to document1, a message is posted to the service worker.
-      1. The service worker checks to see if document2.doc is already open
-         1. If yes, focus that window
-         2. If no, create a new client, post it the document and focus the client.
+`app.com/sw-top.js`<br>
+`app.com/pwa/manifest.json` ⇐ App scope, controlled by sw-top.js<br>
+`app.com/pwa/sub-app/sw-sub-app.js` <br>
+`app.com/pwa/sub-app/subber-app/sw-subber-app.js`
 
-Compare to having the event on the service worker, where we can cut out the first postMessage
-1. A user is editing document1.doc
-2. User then opens document2.doc
-   1. A launch event is fired on the service worker
-      1. The service worker checks to see if document2 is already open
-         1. If yes, focus that window
-         2. If no, create a new client, post it the document and focus the client.
+There are two solutions which are being considered for this problem:
+1. Use whichever service worker manages the launch url for the app
+2. Allow an `open_url` to be specified in the file handlers. The service worker that manages `open_url` will receive the launch event. This could be extended to allow specifying an open url per file handler.
 
-Which API is better depends largely on what the more common case is likely to be:
-1. Opening the file in an existing Window
-   - Note: This only seems to make sense in apps that can only have one instance, otherwise the existing window the browser picks is likely to be fairly arbitrary.
-2. Opening the file in a new window
+Of the two, we're currently leaning towards 1), as it feel more natural (it’s also very similar to what we do in the PWA installability check). In addition, we might not know that there is a ServiceWorker available form `open_url` in 2) unless we have already visited the page. For discussion, see issue #10.
 
-Arguably, the second case is more common on current desktop operating systems. 
-#### Microsoft Office
-Opens each doc in a different window
-
-#### MS Paint
-Opens each image in a new window
-
-#### Preview on OSX
-Only ever has one file open at a time (arguably a special case, and not likely to work on the web)
-
-#### Microsoft Visual Studio
-Each project is opens a new instance of Visual Studio
-
-#### VS Code
-Files trigger a new tab in the last active window, folders result in a new instance
