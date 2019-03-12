@@ -1,6 +1,7 @@
 ## Explainer
 
-Author: Eric Willigers &lt;<ericwilligers@chromium.org>&gt;
+Author: Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
+Author: Jay Harris &lt;<harrisjay@chromium.org>&gt;
 
 ### Motivation
 
