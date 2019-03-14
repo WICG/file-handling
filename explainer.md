@@ -139,7 +139,7 @@ There are a few similar, non-standard APIs, which it may be useful to compare th
 
 #### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
 
-Register content handler was [deprecated](https://github.com/whatwg/html/issues/630) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3).
+Register content handler was [deprecated](https://github.com/whatwg/html/issues/630) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
 
 Example usage, as per MDN
 ```js
@@ -154,7 +154,7 @@ Presumably this API provided readonly access to the file.
 
 #### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
 
-Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard.
+Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard. This API is only available in Chrom(e|ium), and is only to apps published in the Chrome App Store.
 
 Example manifest.json
 ```json
@@ -191,7 +191,7 @@ function(launchData) {
 
 #### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
 
-The WinJS API is surprisingly similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different.
+The WinJS API is surprisingly similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, is isn't accessible from the general web.
 
 Example Registration
 ```xml
