@@ -93,22 +93,22 @@ Grafr need not receive two separate events: one for the open_url Request and one
 This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet. There is further discussion in issue #3.
 
 The below tables compares handling launch events in the service worker and in a client.
-|          | ServiceWorker                                                                                                                                                                          | Launch Event                                                                                                                               |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| The Good | - There is an existing API for managing clients<br>- Can choose what window to open file in<br>- Can handle event without having to open a client (e.g. torrent file, read file later) | - Something will always happen<br>- As fast as possible                                                                                    |
-| The Bad  | - Could silently swallow a launch event<br>- Might be slow (a la fetch)<br>- Not clear which service worker should handle the event                                                    | - Have to proxy through the service worker to handle event in a different client<br>- A client has to be opened before handling can begin. |
+|          | ServiceWorker                                                                                                                                                                          | Launch Event                                                                                                                                                                                                           |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The Good | - There is an existing API for managing clients<br>- Can choose what window to open file in<br>- Can handle event without having to open a client (e.g. torrent file, read file later) | - Something will always happen<br>- As fast as possible                                                                                                                                                                |
+| The Bad  | - Could silently swallow a launch event<br>- Might be slow (a la fetch)<br>- Not clear which service worker should handle the event                                                    | - Have to proxy through the service worker to handle event in a different client<br>- A client has to be opened before handling can begin.<br>- Developers have less control over the window that is opened/focused. |
 Based on this table, it seems that service workers are a more natural place for the launch event handler to live, the main objections concerning speed and bad behavior by a handler, rather than ergonomics. Fortunately, it should be possible to mitigate these concerns through careful API design.
 
 #### Mitigating Slowness
 A small timeout could be applied to the launch event (i.e. one second), to force sites to provide meaningful feedback as quickly as possible. However, this only addresses half the concern. There are worries that going through the ServiceWorker is inherently slow, due to all the IPC calls. However, for one off launch events, it seems likely that this time will be negligible when compared to the time required to start/load a new instance of the site, and to perform I/O to open the file.
 
-#### Providing Feedback
+#### Mitigating Bad Behavior
 not-a-great-experience.com (after being installed) could register itself as a handler for a number of files, and not do anything when they are opened, essentially failing silently. We could completely remove this case by enforcing that either:
 
 1. A notification is shown and preventDefault is called (for the case of handling the file in the background) or
 2. A client is focused
 
-If neither of these conditions are met, the user agent could focus an existing client, or instantiate a new one. This way, we ensure that a user gets some feedback about what is happening. In addition a user agent might choose to blacklist the offending application). Issue #8 is related to this.
+If neither of these conditions are met, the user agent could provide some feedback to the user, such as focusing an existing client instantiating a new one or showing a splash screen. This ensures that users get some kind of information about what is happening. In addition a user agent might choose to blacklist offending applications). Issue #8 is related to this.
 
 #### Which Service Worker
 An application can potentially have multiple service workers installed under its scope, which makes it difficult to determine which worker should receive the launch event. For example:
