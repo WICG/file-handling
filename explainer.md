@@ -132,3 +132,98 @@ Each project is opens a new instance of Visual Studio
 
 #### VS Code
 Files trigger a new tab in the last active window, folders result in a new instance
+
+
+### Prior Art
+There are a few similar, non-standard APIs, which it may be useful to compare this with.
+
+#### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
+
+Register content handler was [deprecated](https://github.com/whatwg/html/issues/630) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3).
+
+Example usage, as per MDN
+```js
+navigator.registerContentHandler(
+    "application/vnd.mozilla.maybe.feed",
+    "http://www.example.tld/?foo=%s",
+    "My Feed Reader"
+);
+```
+
+Presumably this API provided readonly access to the file.
+
+#### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
+
+Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard.
+
+Example manifest.json
+```json
+{
+  ...
+  "file_handlers": {
+    "graph": {
+        "extensions": [ "svg" ],
+        "include_directories": false,
+        "types": [ "image/svg+xml" ],
+        "verb": "open_with"
+    },
+    "raw": {
+        "extensions": [ "csv" ],
+        "include_directories": false,
+        "types": [ "text/csv" ],
+        "verb": "open_with"
+    }
+  }
+}
+```
+
+This would cause a `chrome.app.runtime.onLaunched` event to be fired. This event could be handled in the background process or in a client.
+
+Example Handler
+```js
+function(launchData) {
+  if (launchData.source !== 'file_handler') return;
+
+  // TODO File handling
+  // launchData.items[0] is the first file.
+}
+```
+
+#### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
+
+The WinJS API is surprisingly similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different.
+
+Example Registration
+```xml
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
+   <Applications>
+      <Application Id="AutoLaunch.App">
+         <Extensions>
+            <Extension Category="windows.fileTypeAssociation">
+                <FileTypeAssociation Name="alsdk">
+                  <DisplayName>SDK Sample File Type</DisplayName>
+                  <Logo>images\logo.png</Logo>
+                  <InfoTip>SDK Sample tip </InfoTip>
+                  <EditFlags OpenIsSafe="true" />
+                  <SupportedFileTypes>
+                     <FileType ContentType="image/jpeg">.alsdk</FileType>
+                  </SupportedFileTypes>
+               </FileTypeAssociation>
+            </Extension>
+         </Extensions>
+      </Application>
+   </Applications>
+</Package>
+```
+
+Example Handler
+```js
+function onActivatedHandler(eventArgs) { 
+    if (eventArgs.detail.kind !== Windows.ApplicationModel.Activation.ActivationKind.file)  
+      return;
+    // TODO: Handle file activation. 
+
+    // The number of files received is eventArgs.detail.files.size 
+    // The first file is eventArgs.detail.files[0].name 
+} 
+```
