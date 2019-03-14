@@ -118,17 +118,18 @@ Which API is better depends largely on what the more common case is likely to be
 2. Opening the file in a new window
 
 Arguably, the second case is more common on current desktop operating systems. 
-#### Microsoft Office
-Opens each doc in a different window
 
-#### MS Paint
-Opens each image in a new window
+#### Will the current applications behavior be supported?
+Below is a not-at-all scientific collection of how a few common apps handle files being opened.
 
-#### Preview on OSX
-Only ever has one file open at a time (arguably a special case, and not likely to work on the web)
+App     | SW Launch   | Client Launch   | Description
+------  | ----------- | --------------- | ---------
+VS Code | Yes         | No              | VSCode opens individual files in the last active window (fine for client launch events), unless a parent directory of the file is open in as a workspace, in which case, the file will be opened in the editor for that workspace. This cannot be handled by client events without undesirable focusing of some arbitrary client.
+Paint   | Yes         | Yes             | Always opens a new window.
+TextEdit| Yes         | No              | Opens files in a new window, if they aren't already open, otherwise focus the window that has the file open.
+Sublime | Yes         | Yes             | Configurable. Either always open in new window, or never open in new window.
+Chrome  | Yes        | Yes             | Open in last active window.
 
-#### Microsoft Visual Studio
-Each project is opens a new instance of Visual Studio
+It seems clear that there are at least some cases where it is useful for applications to be able to inspect already open clients and decide where they want a file to be opened. 
 
-#### VS Code
-Files trigger a new tab in the last active window, folders result in a new instance
+Particularly interesting is that in some cases, the application exposes settings for what to do when new file is opened. We briefly considered a declarative API (e.g. Paint says to always open files in a new window in its manifest). This, however, would indicate that this is unlikely to be a workable approach.
