@@ -134,7 +134,7 @@ Each project is opens a new instance of Visual Studio
 Files trigger a new tab in the last active window, folders result in a new instance
 
 
-### Prior Art
+### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
 
 #### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
