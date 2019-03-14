@@ -77,13 +77,13 @@ A [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPL
 
 ### Launch Events
 
-The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling launches application launches.
+The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
 
 The Launch Event would have different properties depending on what caused the event. For example, the FileLaunchEvent would contain a list of the files that should be handled, while the UrlLaunchEvent might have the triggering request.
 
-(NOTE: The below proposal is in no way concrete).
+(NOTE: The below interfaces are highly speculative).
 
-(NOTE: I don't know the correct way of doing this in WebIDL, so the below definition is in TypeScript).
+(NOTE: I don't know the correct way of doing this in WebIDL, so the below definition is in TypeScript. However, for the explainer, this gets the idea across).
 
 ```ts
 // Caused when the application is launched via its shortcut.
@@ -97,7 +97,7 @@ interface FileLaunchEvent {
   files: FileSystemBaseHandle[];
 }
 
-// Caused when the browser would navigated to an in-app link.
+// Caused when the browser would have navigated to an in-app link.
 interface UrlLaunchEvent {
   cause: 'url';
   request: FetchAPIRequest;
