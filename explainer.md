@@ -43,7 +43,7 @@ The user can right click on CSV or SVG files in the operating system's file brow
 A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the service worker, allowing the web application to decide where to open the files (i.e. in a new or existing client).
 
 ```js
-  self.addEventListener('file', event => {
+  self.addEventListener('launch', event => {
     event.waitUntil(async () => {
       const allClients = await clients.matchAll();
       // If there isn't one available, open a window.
@@ -75,17 +75,46 @@ A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WI
 
 A [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
 
-### Single Tab Application (context for the LaunchEvent name)
+### Launch Events
 
-Suppose the user keeps the Grafr web application open, and now switches to the operating system's file browser and chooses more files to open in Grafr. Grafr might prefer for the new LaunchEvent, with the additional files, to be sent to the existing Grafr window.
+The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
 
-The desire for single tab applications also arises in contexts that don't involve file handling. A general proposal for supporting single tab applications, and much more, is discussed in [SW-Launch](https://github.com/WICG/sw-launch/blob/master/explainer.md).
+The Launch Event would have different properties depending on what caused the event. For example, the FileLaunchEvent would contain a list of the files that should be handled, while the UrlLaunchEvent might have the triggering request.
 
-Suppose Grafr is using SW-Launch. Whenever the user navigates to Grafr from another web site, and Grapr is already open in another window, that window would receive the focus, and there would be a LaunchEvent with the incoming Request (url, form parameters etc.).
+(NOTE: The below interfaces are highly speculative).
 
-Similarly, if the user right clicks on CSV or SVG files in the operating system's file browser, and requests they be opened in Grafr, the existing Grapr window would receive the focus, and there would be a LaunchEvent with the new files.
+(NOTE: I don't know the correct way of doing this in WebIDL, so the below definition is in TypeScript. However, for the explainer, this gets the idea across).
 
-Grafr need not receive two separate events: one for the open_url Request and one with the files.
+```ts
+// Caused when the application is launched via its shortcut.
+interface IconLaunchEvent {
+  cause: 'icon';
+}
+
+// Caused when the application is launched via opening a file.
+interface FileLaunchEvent {
+  cause: 'file';
+  files: FileSystemBaseHandle[];
+}
+
+// Caused when the browser would have navigated to an in-app link.
+interface UrlLaunchEvent {
+  cause: 'url';
+  request: FetchAPIRequest;
+}
+
+type LaunchEvent = IconLaunchEvent | FileLaunchEvent | UrlLaunchEvent;
+
+// Example Handler
+const launchEventHandler = (event: LaunchEvent) => {
+  if (event.cause === 'file') {
+    // Do something with files.
+  }
+};
+
+```
+
+More detail is available on the [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) repository.
 
 ### Concerns
 
