@@ -1,6 +1,8 @@
 ## Explainer
 
-Author: Eric Willigers &lt;<ericwilligers@chromium.org>&gt;
+Author: Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
+Author: Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
+Author: Raymes Khoury &lt;<raymes@chromium.org>&gt;
 
 ### Motivation
 
@@ -73,83 +75,16 @@ A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WI
 `name` is the name of the file handler, as defined in the web app manifest. If the user selects files files with different handlers (e.g. a CSV and SVG file, in the case of Graphr), one LaunchEvent will be fired for each handler (though a handler could receive multiple files).
 
 
-A [FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
+A [FileSystemFileHandle](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) allows reading and writing the file. (An earlier proposed API for file reading and writing was [FileEntry](https://www.w3.org/TR/2012/WD-file-system-api-20120417/#the-fileentry-interface) but work on that proposal has discontinued.).
 
 ### Launch Events
 
 The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
 
-The Launch Event would have different properties depending on what caused the event. For example, the FileLaunchEvent would contain a list of the files that should be handled, while the UrlLaunchEvent might have the triggering request.
-
-(NOTE: The below interfaces are highly speculative).
-
-(NOTE: I don't know the correct way of doing this in WebIDL, so the below definition is in TypeScript. However, for the explainer, this gets the idea across).
-
-```ts
-// Caused when the application is launched via its shortcut.
-interface IconLaunchEvent {
-  cause: 'icon';
-}
-
-// Caused when the application is launched via opening a file.
-interface FileLaunchEvent {
-  cause: 'file';
-  files: FileSystemBaseHandle[];
-}
-
-// Caused when the browser would have navigated to an in-app link.
-interface UrlLaunchEvent {
-  cause: 'url';
-  request: FetchAPIRequest;
-}
-
-type LaunchEvent = IconLaunchEvent | FileLaunchEvent | UrlLaunchEvent;
-
-// Example Handler
-const launchEventHandler = (event: LaunchEvent) => {
-  if (event.cause === 'file') {
-    // Do something with files.
-  }
-};
-
-```
-
-More detail is available on the [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) repository.
-
 ### Concerns
 
-This proposal (with new service worker events) was presented to the Service Worker and Web Platform working groups at TPAC 2018. There was concern that executing more code in the service worker might affect performance, and it may not be clear to users which web application is running code, if no client window has been given focus yet.
-
-A different API, was considered with flow similar to the following:
-1. If no window exists, create a new one
-2. Fire launch event on first active window
-
-However, this API would require jumping through some hoops in common cases. Consider a document editor:
-1. A user is editing document1.doc
-2. User then opens document2.doc
-   1. A launch event on document1.doc is fired
-   2. As the editor doesn't want to lost the changes to document1, a message is posted to the service worker.
-      1. The service worker checks to see if document2.doc is already open
-         1. If yes, focus that window
-         2. If no, create a new client, post it the document and focus the client.
-
-Compare to having the event on the service worker, where we can cut out the first postMessage
-1. A user is editing document1.doc
-2. User then opens document2.doc
-   1. A launch event is fired on the service worker
-      1. The service worker checks to see if document2 is already open
-         1. If yes, focus that window
-         2. If no, create a new client, post it the document and focus the client.
-
-Which API is better depends largely on what the more common case is likely to be:
-1. Opening the file in an existing Window
-   - Note: This only seems to make sense in apps that can only have one instance, otherwise the existing window the browser picks is likely to be fairly arbitrary.
-2. Opening the file in a new window
-
-Arguably, the second case is more common on current desktop operating systems. 
-
-#### Will the current applications behavior be supported?
-Below is a not-at-all scientific collection of how a few common apps handle files being opened.
+#### Will the current application behavior be supported?
+Below is a not-at-all scientific collection of how a few common apps handle files being opened. SW Launch refers to the case where we fire a launch event on the service worker, while client launch refers to a theoretical event handler on the client window.
 
 App     | SW Launch   | Client Launch   | Description
 ------  | ----------- | --------------- | ---------
@@ -183,7 +118,7 @@ Presumably this API provided readonly access to the file.
 
 #### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
 
-Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard. This API is only available in Chrom(e|ium), and is only to apps published in the Chrome App Store.
+Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard. This API is only available in Chrom(e|ium), and is only available to apps published in the Chrome App Store.
 
 Example manifest.json
 ```json
