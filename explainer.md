@@ -81,22 +81,7 @@ A [FileSystemFileHandle](https://github.com/WICG/native-file-system/blob/master/
 
 The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
 
-### Concerns
-
-#### Will the current application behavior be supported?
-Below is a not-at-all scientific collection of how a few common apps handle files being opened. SW Launch refers to the case where we fire a launch event on the service worker, while client launch refers to a theoretical event handler on the client window.
-
-App     | SW Launch   | Client Launch   | Description
-------  | ----------- | --------------- | ---------
-VS Code | Yes         | No              | VSCode opens individual files in the last active window (fine for client launch events), unless a parent directory of the file is open in as a workspace, in which case, the file will be opened in the editor for that workspace. This cannot be handled by client events without undesirable focusing of some arbitrary client.
-Paint   | Yes         | Yes             | Always opens a new window.
-TextEdit| Yes         | No              | Opens files in a new window, if the file isn't already open, otherwise focus the window that has the file open.
-Sublime | Yes         | Yes             | Configurable. Either always open in new window, or never open in new window.
-Chrome  | Yes        | Yes             | Open in last active window.
-
-It seems clear that there are at least some cases where it is useful for applications to be able to inspect already open clients and decide where they want a file to be opened. 
-
-Particularly interesting is that in some cases, applications exposes settings for what to do when new file is opened. We briefly considered a declarative API (e.g. Paint says to always open files in a new window in its manifest). This, however, would indicate that this is likely not a workable approach.
+This could either build directly on top of launch events (by subclassing the launch event) or work via a navigation, similar to other triggers of launch events. More in depth discussion is available on the [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#whether-launch-events-should-only-be-triggered-by-navigations) explainer.
 
 ### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
