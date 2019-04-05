@@ -16,21 +16,24 @@ There has historically been no standards-track API for MIME type handling. For s
 
 ### Example
 
-The following web application declares in its manifest that is handles CSV and SVG files.
+The following web application declares in its manifest that can handle CSV and SVG files.
 
 ```json
     {
       "name": "Grafr",
-      "file_handler": [
-        {
-          "name": "raw",
-          "accept": [".csv", "text/csv"]
-        },
-        {
-          "name": "graph",
-          "accept": [".svg", "image/svg+xml"]
-        }
-      ]
+      "file_handler": {
+        "open_url": "/open-files",
+        "files": [
+          {
+            "name": "raw",
+            "accept": [".csv", "text/csv"]
+          },
+          {
+            "name": "graph",
+            "accept": [".svg", "image/svg+xml"]
+          }
+        ]
+      }
     }
 ```
 
@@ -42,46 +45,55 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the service worker, allowing the web application to decide where to open the files (i.e. in a new or existing client).
+This would create a new top level browsing context, navigating to '{origin}{launch_url}{open_url}?files={file_handle}'. Assuming the user opened `graph.csv` in Graphr the url would be something along the lines of `https://graphr.com/open-files?files=file-blob:<GUIDish>`.
+
+> Note: What a serialized file handle might look like has not been finalized. Check the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) repository for more up to date information.
+
+An application could then parse [FileSystemFileHandles](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) from this url to allow reading and writing of the files.
 
 ```js
-  self.addEventListener('launch', event => {
-    event.waitUntil(async () => {
-      const allClients = await clients.matchAll();
-      // If there isn't one available, open a window.
-      if (allClients.length === 0) {
-        const client = clients.openWindow('/');
-        client.postMessage(event.files);
-        client.focus();
-        return;
-      }
-
-      const client = allClients[0];
-      client.postMessage(event.files);
-      client.focus();
-    }());
-  });
+  // On the page graphr.com/open-files
+  const params = new URLSearchParams(window.location.search);
+  const fileHandles = params
+    .getAll('files')
+    .map(f => new FileSystemFileHandle(f));
+  // TODO: Do stuff with file handles
 ```
 
-`event` has the following shape.
+This API is sufficient to allow native files to be opened in web applications. However, it doesn't cater for more advanced use cases, such as opening a file in an existing window, or simply displaying a notification when a file is opened. For these cases applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
-```webidl
-  interface LaunchEvent : ExtendableEvent {
-    readonly attribute DOMString name;
-    sequence<FileSystemFileHandle> files;
+```js
+self.addEventListener('launch', event => {
+  const request = event.request;
+  const url = new URL(request.url);
+  const fileHandles = url.searchParams
+    .getAll('files')
+    .map(f => new FileSystemFileHandle(f));
+
+  // If there are no files, display a notification saying so:
+  if (!fileHandles.length) {
+    self.showNotification('No files to open!');
+    return;
   }
+
+  event.waitUntil(async () => {
+    const allClients = await clients.matchAll();
+    const client = allClients.filter(/*clever logic...*/)[0];
+
+    // No suitable client open, make a new one.
+    if (!client)
+      clients.openWindow(url);
+      return;
+    }
+
+    // Open the files in the existing client we found.
+    client.postMessage({ files: fileHandles, type: '/open-files' });
+    client.focus();
+  });
+});
 ```
 
-`name` is the name of the file handler, as defined in the web app manifest. If the user selects files files with different handlers (e.g. a CSV and SVG file, in the case of Graphr), one LaunchEvent will be fired for each handler (though a handler could receive multiple files).
-
-
-A [FileSystemFileHandle](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) allows reading and writing the file.
-
-### Launch Events
-
-The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
-
-This could either build directly on top of launch events (by subclassing the launch event) or work via a navigation, similar to other triggers of launch events. More in depth discussion is available on the [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#whether-launch-events-should-only-be-triggered-by-navigations) explainer.
+> Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window.
 
 ### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
