@@ -16,7 +16,7 @@ There has historically been no standards-track API for MIME type handling. For s
 
 ### Example
 
-The following web application declares in its manifest that can handle CSV and SVG files.
+The following web application declares in its manifest that it can handle CSV and SVG files.
 
 ```json
     {
