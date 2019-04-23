@@ -37,7 +37,7 @@ The following web application declares in its manifest that it can handle CSV an
     }
 ```
 
-> Note: Open url **MUST** be inside the app scope.
+> Note: `open_url` **MUST** be inside the app scope.
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
