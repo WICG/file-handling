@@ -47,14 +47,16 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-This would create a new top level browsing context, navigating to '{origin}{open_url}'. Assuming the user opened `graph.csv` in Graphr the url would be something along the lines of `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the `EventArgs`, containing a list of the files that the application was launched with. Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
+This would create a new top level browsing context, navigating to '{origin}{open_url}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the `EventArgs`, containing a list of the files that the application was launched with.
 
-> Note: This method of getting launch parameters is somewhat different to what we do in other situations (for example, by posting shared files in WebShareTarget). This is because we need a FileSystemFileHandle object in order to write back to the file. If we redesigned the existing APIs today, I like to think we'd do something similar.
+> Note: Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
 
-The `launchParams` object should look something like this:
+> Note: This method of getting launch parameters is somewhat different to what we do in other situations (for example, posting shared files in WebShareTarget). This is because we need a FileSystemFileHandle object in order to write back to the file, so we can't pass the file handle in as part of the url. If we redesigned the existing APIs today, I like to think we'd do something similar.
+
+The shape of `LaunchEvent` and `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
-  // Cause of the launch (e.g. files|share|shortcut|link). Only files will be supported initially.
+  // Cause of the launch (e.g. files|share|shortcut|link). Only files will be supported initially but will likely be added in future.
   readonly attribute DOMString cause;
   // The files the application was launched with. 
   sequence<FileSystemFileHandle>? files;
