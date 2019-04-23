@@ -72,6 +72,7 @@ An application could then extract the [FileSystemFileHandles](https://github.com
 
 ```js
 window.addEventListener('load', event => {
+  // Launch params could be undefined if the browser doesn't support it.
   if (!event.launchParams || !event.launchParams.cause === 'files')
     return;
 
