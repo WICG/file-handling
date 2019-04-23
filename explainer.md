@@ -37,6 +37,8 @@ The following web application declares in its manifest that it can handle CSV an
     }
 ```
 
+> Note: Open url **MUST** be inside the app scope.
+
 Each accept entry is a sequence of MIME types and/or file extensions.
 
 On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv" and ".svg".
@@ -45,30 +47,45 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-This would create a new top level browsing context, navigating to '{origin}{launch_url}{open_url}?files={file_handle}'. Assuming the user opened `graph.csv` in Graphr the url would be something along the lines of `https://graphr.com/open-files?files=file-blob:<GUIDish>`.
+This would create a new top level browsing context, navigating to '{origin}{open_url}'. Assuming the user opened `graph.csv` in Graphr the url would be something along the lines of `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the `EventArgs`, containing a list of the files that the application was launched with. Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
 
-> Note: What a serialized file handle might look like has not been finalized. Check the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) repository for more up to date information.
+> Note: This method of getting launch parameters is somewhat different to what we do in other situations (for example, by posting shared files in WebShareTarget). This is because we need a FileSystemFileHandle object in order to write back to the file. If we redesigned the existing APIs today, I like to think we'd do something similar.
 
-An application could then parse [FileSystemFileHandles](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) from this url to allow reading and writing of the files.
+The `launchParams` object should look something like this:
+```cs
+interface LaunchParams {
+  // Cause of the launch (e.g. files|share|shortcut|link). Only files will be supported initially.
+  readonly attribute DOMString cause;
+  // The files the application was launched with. 
+  sequence<FileSystemFileHandle>? files;
+}
 
-```js
-  // On the page graphr.com/open-files
-  const params = new URLSearchParams(window.location.search);
-  const fileHandles = params
-    .getAll('files')
-    .map(f => new FileSystemFileHandle(f));
-  // TODO: Do stuff with file handles
+interface LaunchEvent : Event {
+  // An instance of the LaunchParams object above, detailing how the launch happened.
+  attribute LaunchParams launchParams;
+}
 ```
 
-This API is sufficient to allow native files to be opened in web applications. However, it doesn't cater for more advanced use cases, such as opening a file in an existing window, or simply displaying a notification when a file is opened. For these cases applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
+An application could then extract the [FileSystemFileHandles](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) in a `load` event listener, and handle the files.
+
+```js
+window.addEventListener('load', event => {
+  if (!event.launchParams || !event.launchParams.cause === 'files')
+    return;
+
+  const fileHandles = event.launchParams.files;
+  // TODO: Handle the files.
+});
+```
+
+This API is sufficient to allow native files to be opened in web applications. However, it doesn't cater for more advanced use cases, such as opening a file in an existing window, or simply displaying a notification when a file is opened. For these cases applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md). The `launchParams` object would be attached to the `launch` event in an identical manner to the `load` event. 
 
 ```js
 self.addEventListener('launch', event => {
-  const request = event.request;
-  const url = new URL(request.url);
-  const fileHandles = url.searchParams
-    .getAll('files')
-    .map(f => new FileSystemFileHandle(f));
+  if (event.launchParams.cause !== 'files')
+    return;
+
+  const fileHandles = event.launchParams.files;
 
   // If there are no files, display a notification saying so:
   if (!fileHandles.length) {
