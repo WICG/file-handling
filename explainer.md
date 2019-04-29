@@ -47,7 +47,7 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-This would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
+This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
 
 > Note: Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
 
