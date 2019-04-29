@@ -22,7 +22,7 @@ The following web application declares in its manifest that it can handle CSV an
     {
       "name": "Grafr",
       "file_handler": {
-        "open_url": "/open-files",
+        "action": "/open-files",
         "files": [
           {
             "name": "raw",
@@ -37,7 +37,7 @@ The following web application declares in its manifest that it can handle CSV an
     }
 ```
 
-> Note: `open_url` **MUST** be inside the app scope.
+> Note: `action` **MUST** be inside the app scope.
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
@@ -47,13 +47,11 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-This would create a new top level browsing context, navigating to '{origin}{open_url}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the `EventArgs`, containing a list of the files that the application was launched with.
+This would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
 
 > Note: Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
 
-> Note: This method of getting launch parameters is somewhat different to what we do in other situations (for example, posting shared files in WebShareTarget). This is because we need a FileSystemFileHandle object in order to write back to the file, so we can't pass the file handle in as part of the url. If we redesigned the existing APIs today, I like to think we'd do something similar.
-
-The shape of `LaunchEvent` and `LaunchParams` is described below:
+The shape of `LoadEvent` and `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
   // Cause of the launch (e.g. files|share|shortcut|link). Only files will be supported initially but will likely be added in future.
@@ -62,7 +60,7 @@ interface LaunchParams {
   sequence<FileSystemFileHandle>? files;
 }
 
-interface LaunchEvent : Event {
+interface LoadEvent : Event {
   // An instance of the LaunchParams object above, detailing how the launch happened.
   attribute LaunchParams launchParams;
 }
@@ -114,6 +112,19 @@ self.addEventListener('launch', event => {
 ```
 
 > Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window.
+
+### Differences with Similar APIs on the Web
+
+It is worth noting that the proposed method of getting launched files is somewhat different to similar APIs on the web.
+
+- WebShareTarget: All relevant data is contained in the POST request to the page
+- registerProtocolHandler: Relevant data is contained in the query string the page navigates to
+
+In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request, so the page has to wait for an additional event to fire. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
+- The page would have to parse file handles from the url itself, adding boilerplate.
+- Lifetimes for blob-like urls is complicated, as we can't predict when/where the handle will be used.
+
+In addition, were we designing the existing APIs again today, there is a good change we might take this approach for them too.
 
 ### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
