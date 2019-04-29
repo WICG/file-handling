@@ -122,7 +122,7 @@ It is worth noting that the proposed method of getting launched files is somewha
 
 In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request, so the page has to wait for an additional event to fire. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
 - The page would have to parse file handles from the url itself, adding boilerplate.
-- Lifetimes for blob-like urls is complicated, as we can't predict when/where the handle will be used.
+- Lifetimes for blob-like urls are complicated, as we can't predict when/where the handle will be used.
 
 In addition, were we designing the existing APIs again today, there is a good change we might take this approach for them too.
 
