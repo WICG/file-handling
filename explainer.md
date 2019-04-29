@@ -88,12 +88,6 @@ self.addEventListener('launch', event => {
 
   const fileHandles = event.launchParams.files;
 
-  // If there are no files, display a notification saying so:
-  if (!fileHandles.length) {
-    self.showNotification('No files to open!');
-    return;
-  }
-
   event.waitUntil(async () => {
     const allClients = await clients.matchAll();
     const client = allClients.filter(/*clever logic...*/)[0];
@@ -111,7 +105,7 @@ self.addEventListener('launch', event => {
 });
 ```
 
-> Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window.
+> Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window. The details are being considered in [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#addressing-malicious-or-poorly-written-sites).
 
 ### Differences with Similar APIs on the Web
 
@@ -131,7 +125,7 @@ There are a few similar, non-standard APIs, which it may be useful to compare th
 
 #### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
 
-Register content handler was [deprecated](https://github.com/whatwg/html/issues/630) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
+Register content handler was [deprecated](https://blog.chromium.org/2016/08/from-chrome-apps-to-web.html) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
 
 Example usage, as per MDN
 ```js
