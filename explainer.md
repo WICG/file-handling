@@ -16,23 +16,28 @@ There has historically been no standards-track API for MIME type handling. For s
 
 ### Example
 
-The following web application declares in its manifest that is handles CSV and SVG files.
+The following web application declares in its manifest that it can handle CSV and SVG files.
 
 ```json
     {
       "name": "Grafr",
-      "file_handler": [
-        {
-          "name": "raw",
-          "accept": [".csv", "text/csv"]
-        },
-        {
-          "name": "graph",
-          "accept": [".svg", "image/svg+xml"]
-        }
-      ]
+      "file_handler": {
+        "action": "/open-files",
+        "files": [
+          {
+            "name": "raw",
+            "accept": [".csv", "text/csv"]
+          },
+          {
+            "name": "graph",
+            "accept": [".svg", "image/svg+xml"]
+          }
+        ]
+      }
     }
 ```
+
+> Note: `action` **MUST** be inside the app scope.
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
@@ -42,53 +47,85 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-A LaunchEvent containing a sequence<[FileSystemFileHandle](https://github.com/WICG/writable-files/blob/master/EXPLAINER.md)> is then sent to the service worker, allowing the web application to decide where to open the files (i.e. in a new or existing client).
+This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
+
+> Note: `load` is possibly not the correct place for this. We are considering other options, including `DOMContentLoaded` or a completely new event.
+
+The shape of `LoadEvent` and `LaunchParams` is described below:
+```cs
+interface LaunchParams {
+  // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Only files will be supported initially but will likely be added in future. This key would be based on the manifest entry, where appropriate.
+  readonly attribute DOMString cause;
+  // The files the application was launched with. 
+  sequence<FileSystemFileHandle>? files;
+}
+
+interface LoadEvent : Event {
+  // An instance of the LaunchParams object above, detailing how the launch happened.
+  attribute LaunchParams launchParams;
+}
+```
+
+An application could then extract the [FileSystemFileHandles](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) in a `load` event listener, and handle the files.
 
 ```js
-  self.addEventListener('launch', event => {
-    event.waitUntil(async () => {
-      const allClients = await clients.matchAll();
-      // If there isn't one available, open a window.
-      if (allClients.length === 0) {
-        const client = clients.openWindow('/');
-        client.postMessage(event.files);
-        client.focus();
-        return;
-      }
+window.addEventListener('load', event => {
+  // Launch params could be undefined if the browser doesn't support it.
+  if (!event.launchParams || !event.launchParams.cause === 'files')
+    return;
 
-      const client = allClients[0];
-      client.postMessage(event.files);
-      client.focus();
-    }());
+  const fileHandles = event.launchParams.files;
+  // TODO: Handle the files.
+});
+```
+
+This API is sufficient to allow native files to be opened in web applications. However, it doesn't cater for more advanced use cases, such as opening a file in an existing window, or simply displaying a notification when a file is opened. For these cases applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md). The `launchParams` object would be attached to the `launch` event in an identical manner to the `load` event. 
+
+```js
+self.addEventListener('launch', event => {
+  if (event.launchParams.cause !== 'files')
+    return;
+
+  const fileHandles = event.launchParams.files;
+
+  event.waitUntil(async () => {
+    const allClients = await clients.matchAll();
+    const client = allClients.filter(/*clever logic...*/)[0];
+
+    // No suitable client open, make a new one.
+    if (!client)
+      clients.openWindow(url);
+      return;
+    }
+
+    // Open the files in the existing client we found.
+    client.postMessage({ files: fileHandles, type: '/open-files' });
+    client.focus();
   });
+});
 ```
 
-`event` has the following shape.
+> Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window. The details are being considered in [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#addressing-malicious-or-poorly-written-sites).
 
-```webidl
-  interface LaunchEvent : ExtendableEvent {
-    readonly attribute DOMString name;
-    sequence<FileSystemFileHandle> files;
-  }
-```
+### Differences with Similar APIs on the Web
 
-`name` is the name of the file handler, as defined in the web app manifest. If the user selects files files with different handlers (e.g. a CSV and SVG file, in the case of Graphr), one LaunchEvent will be fired for each handler (though a handler could receive multiple files).
+It is worth noting that the proposed method of getting launched files is somewhat different to similar APIs on the web.
 
+- Web Share Target: All relevant data is contained in the POST request to the page
+- registerProtocolHandler: Relevant data is contained in the query string the page navigates to
 
-A [FileSystemFileHandle](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) allows reading and writing the file.
+In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request, so the page has to wait for an additional event to fire. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
+- The page would have to parse file handles from the url itself, adding boilerplate.
+- Lifetimes for blob-like urls are complicated, as we can't predict when/where the handle will be used.
 
-### Launch Events
-
-The intention of the launch events discussed in this explainer is that they be built on top of the more general [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md) proposal, as part of a unified system for handling application launches.
-
-This could either build directly on top of launch events (by subclassing the launch event) or work via a navigation, similar to other triggers of launch events. More in depth discussion is available on the [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#whether-launch-events-should-only-be-triggered-by-navigations) explainer.
+In addition, were we designing the existing APIs again today, there is a good change we might take this approach for them too.
 
 ### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
 
 #### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
 
-Register content handler was [deprecated](https://github.com/whatwg/html/issues/630) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
+Register content handler was [deprecated](https://blog.chromium.org/2016/08/from-chrome-apps-to-web.html) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
 
 Example usage, as per MDN
 ```js
