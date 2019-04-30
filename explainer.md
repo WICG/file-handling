@@ -49,12 +49,12 @@ The user can right click on CSV or SVG files in the operating system's file brow
 
 This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
 
-> Note: Possibly we could use `DOMContentLoaded` or create a custom event type instead of using `load`.
+> Note: `load` is possibly not the correct place for this. We are considering other options, including `DOMContentLoaded` or a completely new event.
 
 The shape of `LoadEvent` and `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
-  // Cause of the launch (e.g. files|share|shortcut|link). Only files will be supported initially but will likely be added in future.
+  // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Only files will be supported initially but will likely be added in future. This key would be based on the manifest entry, where appropriate.
   readonly attribute DOMString cause;
   // The files the application was launched with. 
   sequence<FileSystemFileHandle>? files;
@@ -111,7 +111,7 @@ self.addEventListener('launch', event => {
 
 It is worth noting that the proposed method of getting launched files is somewhat different to similar APIs on the web.
 
-- WebShareTarget: All relevant data is contained in the POST request to the page
+- Web Share Target: All relevant data is contained in the POST request to the page
 - registerProtocolHandler: Relevant data is contained in the query string the page navigates to
 
 In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request, so the page has to wait for an additional event to fire. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
