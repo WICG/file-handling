@@ -76,7 +76,7 @@ Not directly, but once a site has been granted write access to a file it may per
 
 ### 3.16 Does this specification have a "Security Considerations" and "Privacy Considerations" section?
 
-Yes.
+Yes See the [explainer](explainer.md#security-and-privacy-considerations).
 
 
 ### 3.17 Does this specification allow downgrading default security characteristics?
