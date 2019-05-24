@@ -17,8 +17,7 @@ No.
 
 ### 3.4 Does this specification expose persistent, cross-origin state to the web?
 
-No.
-
+Yes, in the form of access to the native file system. Note, however, that the user must have both origins installed as PWAs and must **explicitly** open the same file with both web apps.
 
 ### 3.5 Does this specification expose any other data to an origin that it doesn’t currently have access to?
 
