@@ -217,17 +217,12 @@ function onActivatedHandler(eventArgs) {
 
 ## Security and Privacy Considerations
 
-Providing a way for web applications to handle files makes the web a more compelling alternative to native applications. However this comes with some security and privacy concerns, so care should be taken to limit the damage a malicious website can do (such as modifying executables or ransoming user data), and ensuring that users know what they are getting themselves into.
+There is a large category of attack vectors that are opened up by allowing websites access to native files. These are dealt with in the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#proposed-security-models) explainer.
 
-The primary entry point for this API is opening a file from the OS's file browser, an action that users already understand will grant certain permissions surrounding reading/writing to files. In addition, the file APIs are completely asynchronous, so user agents could insert additional permission prompts before allowing read or write access.
+The additional security-pertinent capability that this specification provides over the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API is the ability to grant access to certain files through the native operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the native operating system.
 
-We suggest some additional mitigations.
+There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
 
-### Not exposed to the drive by web.
-We do not intend to register each web application that a user visits as a file handler. Instead, users will have to install the web application before it shows up as an option to handle files. This gives us some signal that the user trusts the web application, and that they intend to integrate it with their operating system (the 'install' term comes with these kind of implications).
-
-### Limiting access to certain file types.
-Not allowing websites to register as handlers for certain file types (such as executables and dlls) should limit the attack surface. Likely, this will be the same list as that in [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md).
-
-### Not registering websites as default file handlers.
-Before allowing a website to be registered as the default file handle a user agent could prompt the user to ensure that this is actually what they want. Fortunately, users have already been trained with regard to this type of prompt by their native operating systems.
+In addition, the following mitigations are recommended.
+- User agents **SHOULD NOT** register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
+- Users agents **SHOULD NOT** register web applications as the default file handler for any file type without explicit user confirmation.
