@@ -7,7 +7,7 @@ No (though it is conceivable that a user could open sensitive information in a w
 
 ### 3.2 Does this specification deal with high-value data?
 
-Yes. It will grant read (and possibly write) access to some of a users files (if they choose to open them with a PWA). 
+Yes. It will grant read (and possibly write) access to some of a user's files (if they choose to open them with a PWA). 
 
 
 ### 3.3 Does this specification introduce new state for an origin that persists across browsing sessions?
@@ -21,7 +21,9 @@ Yes, in the form of access to the native file system. Note, however, that the us
 
 ### 3.5 Does this specification expose any other data to an origin that it doesn’t currently have access to?
 
-Yes. The origin may be granted access to files on a users machine. However, this will be building on top of the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) proposal and is more another avenue for getting access, than completely new data.
+Yes. The origin may be granted access to files on a user's machine. However, this will be building on top of the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) proposal and is more another avenue for getting access, than completely new data.
+
+Specifically, this will allow native file system access to be granted by choosing to open a file with a web application from the operating system. Previously, native file system access could only be granted by showing a file picker from a web application.
 
 ### 3.6 Does this specification enable new script execution/loading mechanisms?
 
@@ -80,4 +82,4 @@ Yes. See the [explainer](explainer.md#security-and-privacy-considerations).
 
 ### 3.17 Does this specification allow downgrading default security characteristics?
 
-Yes, in that it provides another way for users to expose files on their native file system to the web.
+Yes, in that it provides another way for user's to expose files on their native file system to the web.

@@ -217,9 +217,9 @@ function onActivatedHandler(eventArgs) {
 
 ## Security and Privacy Considerations
 
-Providing a way for web applications to handle files makes the web a more compelling alternative to native applications. However this comes with some scary security and privacy concerns, so care should be taken to limit the damage a malicious website can do (such as modifying executables or ransoming user data), and ensuring that users know what they are getting themselves into.
+Providing a way for web applications to handle files makes the web a more compelling alternative to native applications. However this comes with some security and privacy concerns, so care should be taken to limit the damage a malicious website can do (such as modifying executables or ransoming user data), and ensuring that users know what they are getting themselves into.
 
-The primary entry point for this API is opening a file from the OS's file browser, an action that users already understand will grant certain permissions surrounding reading/writing to files. In addition, the file APIs are completely asynchronous, so user-agents could insert additional permission prompts before allowing read or write access.
+The primary entry point for this API is opening a file from the OS's file browser, an action that users already understand will grant certain permissions surrounding reading/writing to files. In addition, the file APIs are completely asynchronous, so user agents could insert additional permission prompts before allowing read or write access.
 
 We suggest some additional mitigations.
 
