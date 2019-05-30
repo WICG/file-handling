@@ -43,7 +43,7 @@ Each accept entry is a sequence of MIME types and/or file extensions.
 
 On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv" and ".svg".
 
-On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
+On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats that the browser supports, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
@@ -54,7 +54,8 @@ This would create a new top level browsing context, navigating to '{origin}{acti
 The shape of `LoadEvent` and `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
-  // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Only files will be supported initially but will likely be added in future. This key would be based on the manifest entry, where appropriate.
+  // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Initially only file_handler will be supported but more will likely be added in future.
+  // The values of this enum should be based on entries in the manifest (such as 'file_handler' and 'share_target'), where appropriate.
   readonly attribute DOMString cause;
   // The files the application was launched with. 
   sequence<FileSystemFileHandle>? files;
@@ -71,7 +72,7 @@ An application could then extract the [FileSystemFileHandles](https://github.com
 ```js
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
-  if (!event.launchParams || !event.launchParams.cause === 'files')
+  if (!event.launchParams || !event.launchParams.cause === 'file_handler')
     return;
 
   const fileHandles = event.launchParams.files;
@@ -94,7 +95,7 @@ self.addEventListener('launch', event => {
 
     // No suitable client open, make a new one.
     if (!client)
-      clients.openWindow(url);
+      await clients.openWindow(url);
       return;
     }
 
@@ -213,3 +214,15 @@ function onActivatedHandler(eventArgs) {
     // The first file is eventArgs.detail.files[0].name 
 } 
 ```
+
+## Security and Privacy Considerations
+
+There is a large category of attack vectors that are opened up by allowing websites access to native files. These are dealt with in the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#proposed-security-models) explainer.
+
+The additional security-pertinent capability that this specification provides over the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API is the ability to grant access to certain files through the native operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the native operating system.
+
+There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
+
+In addition, the following mitigations are recommended.
+- User agents **SHOULD NOT** register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
+- Users agents **SHOULD NOT** register web applications as the default file handler for any file type without explicit user confirmation.
