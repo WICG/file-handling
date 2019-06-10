@@ -47,66 +47,46 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
 
-This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on the event, containing a list of the files that the application was launched with.
+This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on global object.
 
-> Note: `load` is possibly not the correct place for this. We are considering other options, including `DOMContentLoaded` or a completely new event.
+> Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch) explainer.
 
-The shape of `LoadEvent` and `LaunchParams` is described below:
+The shape of `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
   // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Initially only file_handler will be supported but more will likely be added in future.
   // The values of this enum should be based on entries in the manifest (such as 'file_handler' and 'share_target'), where appropriate.
   readonly attribute DOMString cause;
   // The files the application was launched with. 
-  sequence<FileSystemFileHandle>? files;
-}
-
-interface LoadEvent : Event {
-  // An instance of the LaunchParams object above, detailing how the launch happened.
-  attribute LaunchParams launchParams;
+  sequence<FileSystemFileHandle>? fileHandles;
 }
 ```
 
-An application could then extract the [FileSystemFileHandles](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) in a `load` event listener, and handle the files.
+An application could then choose how to handle the files it was launched with. We recommend saving the file handle to disk and creating a url to address the launched file. This way a user can navigate back to a file they had open.
 
 ```js
+// In graphr.com/open-files
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
-  if (!event.launchParams || !event.launchParams.cause === 'file_handler')
+  if (!window.launchParams || !window.launchParams.cause === 'file_handler')
     return;
 
-  const fileHandles = event.launchParams.files;
-  // TODO: Handle the files.
+  const fileHandle = event.launchParams.fileHandles[0];
+  // Generate some identifier.
+  const fileId = getFileIdentifier(fileHandle);
+
+  // Save fileHandle as fileId in indexed db (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
+
+  // Redirect to /file/${fileId}
+  window.location.href = `/file/${fileId}`;
 });
+
+// In graphr.com/file/{fileId}
+// Load the file from indexedDb (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
+// Read/Write from the file.
 ```
 
-This API is sufficient to allow native files to be opened in web applications. However, it doesn't cater for more advanced use cases, such as opening a file in an existing window, or simply displaying a notification when a file is opened. For these cases applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md). The `launchParams` object would be attached to the `launch` event in an identical manner to the `load` event. 
-
-```js
-self.addEventListener('launch', event => {
-  if (event.launchParams.cause !== 'files')
-    return;
-
-  const fileHandles = event.launchParams.files;
-
-  event.waitUntil(async () => {
-    const allClients = await clients.matchAll();
-    const client = allClients.filter(/*clever logic...*/)[0];
-
-    // No suitable client open, make a new one.
-    if (!client)
-      await clients.openWindow(url);
-      return;
-    }
-
-    // Open the files in the existing client we found.
-    client.postMessage({ files: fileHandles, type: '/open-files' });
-    client.focus();
-  });
-});
-```
-
-> Note: The launch event is likely to have an aggressive timeout, so all File IO should be done in a client window. The details are being considered in [sw-launch](https://github.com/WICG/sw-launch/blob/master/explainer.md#addressing-malicious-or-poorly-written-sites).
+For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
 ### Differences with Similar APIs on the Web
 
