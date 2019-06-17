@@ -57,8 +57,12 @@ interface LaunchParams {
   // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Initially only file_handler will be supported but more will likely be added in future.
   // The values of this enum should be based on entries in the manifest (such as 'file_handler' and 'share_target'), where appropriate.
   readonly attribute DOMString cause;
-  // The files the application was launched with. 
+
+  // The files (if any) the application was launched with.
   sequence<FileSystemFileHandle>? fileHandles;
+
+  // The request which is the cause of the launch. This is a copy of the request that is sent to the server.
+  Request request;
 }
 ```
 
@@ -68,7 +72,7 @@ An application could then choose how to handle the files it was launched with. W
 // In graphr.com/open-files
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
-  if (!window.launchParams || !window.launchParams.cause === 'file_handler')
+  if (!window.launchParams || window.launchParams.cause !== 'file_handler')
     return;
 
   const fileHandle = event.launchParams.fileHandles[0];
@@ -82,7 +86,7 @@ window.addEventListener('load', event => {
 });
 
 // In graphr.com/file/{fileId}
-// Load the file from indexedDb (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
+// Load fileId from indexedDb (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
 // Read/Write from the file.
 ```
 
