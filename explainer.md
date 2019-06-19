@@ -54,10 +54,6 @@ This would create a new top level browsing context, navigating to '{origin}{acti
 The shape of `LaunchParams` is described below:
 ```cs
 interface LaunchParams {
-  // Cause of the launch (e.g. file_handler|share_target|shortcut|link). Initially only file_handler will be supported but more will likely be added in future.
-  // The values of this enum should be based on entries in the manifest (such as 'file_handler' and 'share_target'), where appropriate.
-  readonly attribute DOMString cause;
-
   // The files (if any) the application was launched with.
   sequence<FileSystemFileHandle>? fileHandles;
 
