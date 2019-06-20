@@ -68,7 +68,7 @@ An application could then choose how to handle the files it was launched with. W
 // In graphr.com/open-files
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
-  if (!window.launchParams || window.launchParams.cause !== 'file_handler')
+  if (!window.launchParams || !window.launchParams.request.url.startsWith("/open-file/"))
     return;
 
   const fileHandle = event.launchParams.fileHandles[0];
