@@ -119,6 +119,13 @@ navigator.registerContentHandler(
 
 Presumably this API provided readonly access to the file.
 
+##### Why not resurrect this now more vendors are interested?
+`registerContentHandler` was not designed to handle files being opened, rather it was designed to handle link clicks that resolve to certain mime types (see [Example 17](https://www.w3.org/TR/html52/webappapis.html#custom-scheme-and-content-handlers-the-registerprotocolhandler-and-registercontenthandler-methods) from the spec).
+
+For Example:
+1. It requires file handles to be encodable as a string (this will not be possible with the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API, which is required to write to files).
+2. It can only register handlers for content types. This is a problem because some operating systems only support file extensions and we don't want to spec and maintain a mapping. See this [issue](https://github.com/WICG/web-share-target/issues/74) for more context.
+
 #### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
 
 Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard. This API is only available in Chrom(e|ium), and is only available to apps published in the Chrome App Store.
