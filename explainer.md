@@ -62,7 +62,7 @@ interface LaunchParams {
 }
 ```
 
-An application could then choose how to handle the files it was launched with. We recommend saving the file handle to disk and creating a url to address the launched file. This way a user can navigate back to a file they had open.
+An application could then choose how to handle the files it was launched with. For example, it could save the file handle to disk and create a url to address the launched file. This would allow users to navigate back to a file.
 
 ```js
 // In graphr.com/open-files
