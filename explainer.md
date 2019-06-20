@@ -78,7 +78,7 @@ window.addEventListener('load', event => {
   // Save fileHandle as fileId in indexed db (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
 
   // Redirect to /file/${fileId}
-  window.location.href = `/file/${fileId}`;
+  window.history.pushState({}, null, `/file/${fileId}`);
 });
 
 // In graphr.com/file/{fileId}
