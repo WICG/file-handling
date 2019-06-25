@@ -62,8 +62,7 @@ interface LaunchParams {
 }
 ```
 
-An application could then choose how to handle the files it was launched with. For example, it could save the file handle to disk and create a url to address the launched file. This would allow users to navigate back to a file.
-
+Below is a basic example receiving the file handles.
 ```js
 // In graphr.com/open-files
 window.addEventListener('load', event => {
@@ -71,20 +70,12 @@ window.addEventListener('load', event => {
   if (!window.launchParams || !window.launchParams.request.url.startsWith("/open-file/"))
     return;
 
-  const fileHandle = event.launchParams.fileHandles[0];
-  // Generate some identifier.
-  const fileId = getFileIdentifier(fileHandle);
-
-  // Save fileHandle as fileId in indexed db (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
-
-  // Redirect to /file/${fileId}
-  window.history.pushState({}, null, `/file/${fileId}`);
+  const fileHandle = window.launchParams.fileHandles[0];
+  // Handle the file:
+  // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
 });
-
-// In graphr.com/file/{fileId}
-// Load fileId from indexedDb (https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code).
-// Read/Write from the file.
 ```
+An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a url to address the launched file, allowing users to navigate back to a file.
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
