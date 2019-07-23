@@ -156,7 +156,7 @@ function(launchData) {
 
 #### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
 
-The WinJS API is surprisingly similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, is isn't accessible from the general web.
+The WinJS API is similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, is isn't accessible from the general web.
 
 Example Registration
 ```xml
