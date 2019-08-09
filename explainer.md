@@ -21,19 +21,18 @@ The following web application declares in its manifest that it can handle CSV an
 ```json
     {
       "name": "Grafr",
-      "file_handler": {
-        "action": "/open-files",
-        "files": [
-          {
-            "name": "raw",
-            "accept": [".csv", "text/csv"]
-          },
-          {
-            "name": "graph",
-            "accept": [".svg", "image/svg+xml"]
-          }
-        ]
-      }
+      "file_handler": [
+        {
+          "action": "/open-csv",
+          "name": "Raw Graph",
+          "accept": [ ".csv", "text/csv" ]
+        }
+        {
+          "action": "/open-svg",
+          "name": "SVG Graph",
+          "accept": [ ".svg", "text/svg+xml" ]
+        }
+      ]
     }
 ```
 
@@ -45,9 +44,9 @@ On platforms that only use file extensions to describe file types, user agents c
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats that the browser supports, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
 
-The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).)
+The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).). The user agent should use `${file_handler}.${name}` in the entry it shows in the operating system file browser. For example, when right clicking a CSV file the user might see the option to open it with `"Graphr: Raw Graph"`.
 
-This would create a new top level browsing context, navigating to '{origin}{action}?name={HANDLER_NAME}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-files/?name=raw`. When the `load` event is fired, an additional `launchParams` property will be available on global object.
+Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch) explainer.
 
@@ -64,10 +63,10 @@ interface LaunchParams {
 
 Below is a basic example receiving the file handles.
 ```js
-// In graphr.com/open-files
+// In graphr.com/open-csv
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
-  if (!window.launchParams || !window.launchParams.request.url.startsWith("/open-file/"))
+  if (!window.launchParams || !window.launchParams.fileHandles)
     return;
 
   const fileHandle = window.launchParams.fileHandles[0];
@@ -86,7 +85,7 @@ It is worth noting that the proposed method of getting launched files is somewha
 - Web Share Target: All relevant data is contained in the POST request to the page
 - registerProtocolHandler: Relevant data is contained in the query string the page navigates to
 
-In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request, so the page has to wait for an additional event to fire. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
+In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
 - The page would have to parse file handles from the url itself, adding boilerplate.
 - Lifetimes for blob-like urls are complicated, as we can't predict when/where the handle will be used.
 
