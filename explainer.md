@@ -36,7 +36,7 @@ The following web application declares in its manifest that it can handle CSV an
     }
 ```
 
-> Note: `action` **MUST** be inside the app scope.
+> Note: `action` must be inside the app scope.
 
 Each accept entry is a sequence of MIME types and/or file extensions.
 
@@ -201,5 +201,5 @@ The additional security-pertinent capability that this specification provides ov
 There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
 
 In addition, the following mitigations are recommended.
-- User agents **SHOULD NOT** register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
-- Users agents **SHOULD NOT** register web applications as the default file handler for any file type without explicit user confirmation.
+- User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
+- Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
