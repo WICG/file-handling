@@ -46,7 +46,7 @@ On a system that does not use file extensions but associates files with MIME typ
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).). The user agent should use `${file_handler}.${name}` in the entry it shows in the operating system file browser. For example, when right clicking a CSV file the user might see the option to open it with `"Grafr: Raw Graph"`.
 
-Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the url would be `https://grafr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
+Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch) explainer.
 
@@ -74,7 +74,7 @@ window.addEventListener('load', event => {
   // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
 });
 ```
-An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a url to address the launched file, allowing users to navigate back to a file.
+An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
@@ -85,9 +85,9 @@ It is worth noting that the proposed method of getting launched files is somewha
 - Web Share Target: All relevant data is contained in the POST request to the page
 - registerProtocolHandler: Relevant data is contained in the query string the page navigates to
 
-In contrast, when we perform a navigation to the file-handling url, the files are not available as part of a request. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
-- The page would have to parse file handles from the url itself, adding boilerplate.
-- Lifetimes for blob-like urls are complicated, as we can't predict when/where the handle will be used.
+In contrast, when we perform a navigation to the file-handling URL, the files are not available as part of a request. We briefly considered encoding the `FileSystemFileHandles` in the query string in a blob-like format (e.g. `file-handle://<GUIDish>`). However, this presents some problems:
+- The page would have to parse file handles from the URL itself, adding boilerplate.
+- Lifetimes for blob-like URLs are complicated, as we can't predict when/where the handle will be used.
 
 In addition, were we designing the existing APIs again today, there is a good change we might take this approach for them too.
 
