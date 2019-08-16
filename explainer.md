@@ -44,9 +44,9 @@ On platforms that only use file extensions to describe file types, user agents c
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv" and "image/svg+xml" MIME types. If the web application accepts all text and image formats that the browser supports, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
 
-The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).). The user agent should use `${file_handler}.${name}` in the entry it shows in the operating system file browser. For example, when right clicking a CSV file the user might see the option to open it with `"Graphr: Raw Graph"`.
+The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).). The user agent should use `${file_handler}.${name}` in the entry it shows in the operating system file browser. For example, when right clicking a CSV file the user might see the option to open it with `"Grafr: Raw Graph"`.
 
-Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Graphr the url would be `https://graphr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
+Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the url would be `https://grafr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch) explainer.
 
@@ -63,7 +63,7 @@ interface LaunchParams {
 
 Below is a basic example receiving the file handles.
 ```js
-// In graphr.com/open-csv
+// In grafr.com/open-csv
 window.addEventListener('load', event => {
   // Launch params could be undefined if the browser doesn't support it.
   if (!window.launchParams || !window.launchParams.fileHandles)
