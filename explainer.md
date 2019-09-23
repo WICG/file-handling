@@ -24,21 +24,18 @@ The following web application declares in its manifest that it can handle CSV an
       "file_handler": [
         {
           "action": "/open-csv",
-          "name": "Raw Graph",
           "accept": {
             "text/csv": [ ".csv" ]
           }
         },
         {
           "action": "/open-svg",
-          "name": "SVG Graph",
           "accept": {
             "image/svg+xml": ".svg"
           }
         },
         {
           "action": "/open-graf",
-          "name": "Grafr File",
           "accept": {
             "application/vnd.grafr.graph": [
               ".grafr", ".graf"
@@ -202,7 +199,7 @@ function onActivatedHandler(eventArgs) {
     // TODO: Handle file activation. 
 
     // The number of files received is eventArgs.detail.files.size 
-    // The first file is eventArgs.detail.files[0].name 
+    // The first file is eventArgs.detail.files[0] 
 } 
 ```
 
