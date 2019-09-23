@@ -33,7 +33,7 @@ The following web application declares in its manifest that it can handle CSV an
           "action": "/open-svg",
           "name": "SVG Graph",
           "accept": {
-            "image/svg+xml": ".svg",
+            "image/svg+xml": ".svg"
           }
         },
         {
@@ -43,9 +43,7 @@ The following web application declares in its manifest that it can handle CSV an
             "application/vnd.grafr.graph": [
               ".grafr", ".graf"
             ],
-            "application/vnd.alternative-graph-app.graph": [
-              ".graph",
-            ]
+            "application/vnd.alternative-graph-app.graph": ".graph"
           }
         }
       ]
@@ -60,7 +58,7 @@ On a system that does not use file extensions but associates files with MIME typ
 
 On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv", ".svg", ".grafr", ".graf" and ".graph".
 
-The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).). The user agent should use `${file_handler}.${name}` in the entry it shows in the operating system file browser. For example, when right clicking a CSV file the user might see the option to open it with `"Grafr: Raw Graph"`.
+The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).).
 
 Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
 
