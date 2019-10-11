@@ -62,7 +62,7 @@ The user can right click on CSV or SVG files in the operating system's file brow
 
 Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`.
 
-To access launched files, a site should subscribe to a `launchQueue` object attached to `window`. Launches are queued until they are consumed by a launch consumer, which is invoked exactly once for each launch. This ensures that we avoid any races when attaching an event listener.
+To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
 
