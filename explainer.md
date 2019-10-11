@@ -62,23 +62,21 @@ The user can right click on CSV or SVG files in the operating system's file brow
 
 Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`.
 
-To access launched files, a site should subscribe to a `launches` object attached to `window`. The `next` function is a called once for each launch. Launches are cached (in order) until they are consumed by a subscriber. This ensures that we avoid any races when attaching an event listener.
+To access launched files, a site should subscribe to a `launchQueue` object attached to `window`. Launches are queued until they are consumed by a launch consumer, which is invoked exactly once for each launch. This ensures that we avoid any races when attaching an event listener.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
 
 Below is a basic example receiving the file handles.
 ```js
 // In grafr.com/open-csv
-if ('launches' in window) {
-  launches.subscribe({
-    next(launchParams) {
-      if (!launchParams.fileHandles.length)
-        return;
+if ('launchQueue' in window) {
+  launchQueue.setConsumer(launchParams => {
+    if (!launchParams.files.length)
+      return;
 
-      const fileHandle = launchParams.fileHandles[0];
-      // Handle the file:
-      // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
-    }
+    const fileHandle = launchParams.fileHandles[0];
+    // Handle the file:
+    // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
   });
 }
 ```
