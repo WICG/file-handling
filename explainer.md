@@ -60,33 +60,25 @@ On platforms that only use file extensions to describe file types, user agents c
 
 The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).).
 
-Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. When the `load` event is fired, an `fileHandles` will be available in the `launchParams` property on the global object.
+Choosing to open the file would create a new top level browsing context, navigating to '{origin}{action}'. Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`.
 
-> Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch) explainer.
+To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified.
 
-The shape of `LaunchParams` is described below:
-```cs
-interface LaunchParams {
-  // The files (if any) the application was launched with.
-  sequence<FileSystemFileHandle>? fileHandles;
-
-  // The request which is the cause of the launch. This is a copy of the request that is sent to the server.
-  Request request;
-}
-```
+> Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
 
 Below is a basic example receiving the file handles.
 ```js
 // In grafr.com/open-csv
-window.addEventListener('load', event => {
-  // Launch params could be undefined if the browser doesn't support it.
-  if (!window.launchParams || !window.launchParams.fileHandles)
-    return;
+if ('launchQueue' in window) {
+  launchQueue.setConsumer(launchParams => {
+    if (!launchParams.files.length)
+      return;
 
-  const fileHandle = window.launchParams.fileHandles[0];
-  // Handle the file:
-  // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
-});
+    const fileHandle = launchParams.fileHandles[0];
+    // Handle the file:
+    // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
+  });
+}
 ```
 An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
 
