@@ -21,7 +21,7 @@ The following web application declares in its manifest that it can handle CSV an
 ```json
     {
       "name": "Grafr",
-      "file_handler": [
+      "file_handlers": [
         {
           "action": "/open-csv",
           "name": "Raw Graph",
@@ -74,7 +74,7 @@ if ('launchQueue' in window) {
     if (!launchParams.files.length)
       return;
 
-    const fileHandle = launchParams.fileHandles[0];
+    const fileHandle = launchParams.files[0];
     // Handle the file:
     // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
   });
