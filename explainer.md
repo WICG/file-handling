@@ -203,6 +203,12 @@ The additional security-pertinent capability that this specification provides ov
 
 There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
 
-In addition, the following mitigations are recommended.
+Similar issues may arise around the creation of app-to-file-type associations on the host OS when a web application is installed. For example, while having an installed application appear in open-with context menus is desirable from the standpoint of transparency with native apps, it does create new opportunities for granting unintentional access.
+
+One solution is to display a permissions prompt before registering the handlers in the first place. Another is to display a prompt whenever a given file type is opened in an installed web application for the first time. However, both of these are atypical in comparison to the install behavior of non-default file handlers for native applications; arguably, a user's explicitly choosing to open a file in the installed application amounts to a sufficient signal of trust. (This signal is even stronger where the user has elected to make the application the default handler for the type.)
+
+This does not hold where there are no existing applications on the host OS capable of handling the given file type. In this case, installing a web application could plausibly cause it to become the default handler for that file type, silently and without any intervention from the user. Here an explicit permission prompt might be necessary to avoid unauthorized access. 
+
+The following mitigations are recommended.
 - User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
 - Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
