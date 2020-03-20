@@ -201,14 +201,13 @@ There is a large category of attack vectors that are opened up by allowing websi
 
 The additional security-pertinent capability that this specification provides over the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API is the ability to grant access to certain files through the native operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the native operating system.
 
-There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
+There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Similarly, a user's explicit choice to open a file in an installed application, such as via a context menu, can be read as a sufficient signal of trust in the application.
 
-Similar issues may arise around the creation of app-to-file-type associations on the host OS when a web application is installed. For example, while having an installed application appear in open-with context menus is desirable from the standpoint of transparency with native apps, it does create new opportunities for granting unintentional access.
+### Accidental default association
+The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. (TODO: Investigate which host OSes exhibit this behavior.) On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary so as to avoid accidentally sending the contents of a file to a web application without the user's consent.
 
-One solution is to display a permissions prompt before registering the handlers in the first place. Another is to display a prompt whenever a given file type is opened in an installed web application for the first time. However, both of these are atypical in comparison to the install behavior of non-default file handlers for native applications; arguably, a user's explicitly choosing to open a file in the installed application amounts to a sufficient signal of trust. (This signal is even stronger where the user has elected to make the application the default handler for the type.)
-
-This does not hold where there are no existing applications on the host OS capable of handling the given file type. In this case, installing a web application could plausibly cause it to become the default handler for that file type, silently and without any intervention from the user. Here an explicit permission prompt might be necessary to avoid unauthorized access. 
-
+### Mitigations
 The following mitigations are recommended.
 - User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
 - Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
+- A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). 
