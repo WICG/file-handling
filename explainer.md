@@ -201,8 +201,15 @@ There is a large category of attack vectors that are opened up by allowing websi
 
 The additional security-pertinent capability that this specification provides over the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API is the ability to grant access to certain files through the native operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the native operating system.
 
-There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file.
+There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a sufficient signal of trust in the application.
 
-In addition, the following mitigations are recommended.
+### Accidental default association
+
+The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. (TODO: Investigate which host OSes exhibit this behavior.) This would mean if the user double-clicks a file of that type, it would automatically open in the registered web app. On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary, to avoid accidentally sending the contents of a file to a web application without the user's consent.
+
+### Mitigations
+
+The following mitigations are recommended.
 - User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
 - Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
+- A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
