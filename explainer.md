@@ -1,4 +1,4 @@
-## Explainer
+# Explainer
 
 Authors: 
 * Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
@@ -6,9 +6,9 @@ Authors:
 * Darwin Huang &lt;<huangdarwin@chromium.org>&gt;<br>
 * Raymes Khoury &lt;<raymes@chromium.org>&gt;
 
-### Motivation
+## Motivation
 
-This proposal gives web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file.
+This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file.
 
 This has many use cases. For example:
 * An image editor could display and edit a number of image formats.
@@ -18,7 +18,7 @@ This has many use cases. For example:
 
 There has historically been no standards-track API for MIME type handling. For some years, [Chrome packaged apps](https://developer.chrome.com/docs/extensions/apps/) have been able to register one or more file handlers using a [Chrome-specific API](https://developer.chrome.com/apps/manifest/file_handlers) where each handler may handle specific MIME types and/or file extensions. As of August 2018, 619 file handlers handled MIME types, while 509 file handlers handled file extensions. Some packaged apps had more than one file handler. Overall, 580 packaged apps handled MIME types and 337 packaged apps handled file extensions. This usage, and the use cases above, demonstrates the value of being able to associate web applications with MIME types and/or file extensions.
 
-### Example
+## Example
 
 The following web application declares in its manifest that it can handle CSV and SVG files, as well as a hypothetical GRAF file format that may be custom-designed for this application.
 
@@ -81,7 +81,7 @@ An application could then choose to handle these files however it chose. For exa
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
-### Differences with Similar APIs on the Web
+## Differences with Similar APIs on the Web
 
 The proposed method of getting launched files differs from some similar web APIs:
 
@@ -94,10 +94,10 @@ In contrast, when we perform a navigation to the file-handling URL, the files ar
 
 In addition, were we designing the existing APIs again today, there is a good chance we might take this approach for them too.
 
-### Previous Solutions
+## Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
 
-#### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
+### [registerContentHandler](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerContentHandler)
 
 Register content handler was [deprecated](https://blog.chromium.org/2016/08/from-chrome-apps-to-web.html) due to the lack of two interoperable implementations and the implementation that was available [did not conform to that standard](https://github.com/whatwg/html/commit/b143dbc2d16f3473fcadee377d838070718549d3). This API was only available in Firefox.
 
@@ -112,14 +112,14 @@ navigator.registerContentHandler(
 
 Presumably this API provided readonly access to the file.
 
-##### Why not resurrect this now more vendors are interested?
+#### Why not resurrect this now more vendors are interested?
 `registerContentHandler` was not designed to handle files being opened, rather it was designed to handle link clicks that resolve to certain mime types (see [Example 17](https://www.w3.org/TR/html52/webappapis.html#custom-scheme-and-content-handlers-the-registerprotocolhandler-and-registercontenthandler-methods) from the spec).
 
 For Example:
 1. It requires file handles to be encodable as a string (this will not be possible with the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API, which is required to write to files).
 2. It can only register handlers for content types. This is a problem because some operating systems only support file extensions and we don't want to spec and maintain a mapping. See this [issue](https://github.com/WICG/web-share-target/issues/74) for more context.
 
-#### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
+### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
 
 Chrome Apps are in the process of being [deprecated](https://arstechnica.com/gadgets/2017/12/google-shuts-down-the-apps-section-of-the-chrome-web-store/) in favour of PWAs. The API was never intended to be a web standard. This API is only available in Chrom(e|ium), and is only available to apps published in the Chrome App Store.
 
@@ -156,7 +156,7 @@ function(launchData) {
 }
 ```
 
-#### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
+### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
 
 The WinJS API is similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, isn't accessible from the general web.
 
@@ -195,7 +195,7 @@ function onActivatedHandler(eventArgs) {
 } 
 ```
 
-## Security and Privacy Considerations
+# Security and Privacy Considerations
 
 There is a large category of attack vectors that are opened up by allowing websites access to native files. These are dealt with in the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#proposed-security-models) explainer.
 
@@ -214,7 +214,7 @@ The following mitigations are recommended.
 * Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
 * A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
 
-### References:
+## References:
 * [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
 * Chrome Design Documents:
   * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws/edit#).
