@@ -1,22 +1,26 @@
 ## Explainer
 
-Author: Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
-Author: Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
-Author: Raymes Khoury &lt;<raymes@chromium.org>&gt;
+Authors: 
+* Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
+* Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
+* Darwin Huang &lt;<huangdarwin@chromium.org>&gt;<br>
+* Raymes Khoury &lt;<raymes@chromium.org>&gt;
 
 ### Motivation
 
-This proposal gives web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions.
+This proposal gives web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file.
 
-This has many use cases. An image editor might be able to display and edit a number of image formats. A movie player might understand a video format. A data visualizer might generate graphs from .CSV files. A Logo environment might interactively step through Logo programs.
+This has many use cases. For example:
+* An image editor could display and edit a number of image formats.
+* A movie player could play a video format.
+* A Javascript environment could interactively step through Javascript programs.
+* A data visualizer could generate graphs from .CSV files.
 
-Some more use cases and motivations are listed in the [Ballista explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
-
-There has historically been no standards-track API for MIME type handling. For some years, Chrome packaged apps have been able to register one or more file handlers using a [Chrome-specific API](https://developer.chrome.com/apps/manifest/file_handlers) where each handler may handle specific MIME types and/or file extensions. This provides some insight into the demand for such functionality. As of August 2018, 619 file handlers handle MIME types, while 509 file handlers handle file extensions. Some of the packages apps have more than one file handler. Overall, 580 packaged apps handle MIME types and 337 packaged apps handle file extensions. This usage, and the use cases above, demonstrate the value of being able to associate web applications with MIME types and/or file extensions.
+There has historically been no standards-track API for MIME type handling. For some years, [Chrome packaged apps](https://developer.chrome.com/docs/extensions/apps/) have been able to register one or more file handlers using a [Chrome-specific API](https://developer.chrome.com/apps/manifest/file_handlers) where each handler may handle specific MIME types and/or file extensions. As of August 2018, 619 file handlers handled MIME types, while 509 file handlers handled file extensions. Some packaged apps had more than one file handler. Overall, 580 packaged apps handled MIME types and 337 packaged apps handled file extensions. This usage, and the use cases above, demonstrates the value of being able to associate web applications with MIME types and/or file extensions.
 
 ### Example
 
-The following web application declares in its manifest that it can handle CSV and SVG files.
+The following web application declares in its manifest that it can handle CSV and SVG files, as well as a hypothetical GRAF file format that may be custom-designed for this application.
 
 ```json
     {
@@ -49,17 +53,13 @@ The following web application declares in its manifest that it can handle CSV an
 
 > Note: `action` must be inside the app scope.
 
-Each accept entry is a dictionary mapping mimetypes to extensions. This ensures applications will still work on operating systems that only support one of the two. This also allows applications to register custom file types on all platforms (even Linux, which [only supports mimetypes](https://stackoverflow.com/a/31836/3260044)).
+Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types.
 
-On a system that does not use file extensions but associates files with MIME types, user agents can match on the "text/csv", "image/svg+xml", "application/vnd.grafr.graph" and "application/vnd.alternative-graph-app.graph" MIME types. If the web application accepts all text and image formats that the browser supports, "text/\*" and "image/\*" could be used, i.e. "\*" may appear in place of a subtype. "\*/\*" can be used if all files are accepted.
+On a system that does not use file extensions but associates files with MIME types, user agents can match on the `"text/csv"`, `"image/svg+xml"`, `"application/vnd.grafr.graph"` and `"application/vnd.alternative-graph-app.graph"` MIME types. If the web application accepts all text and image formats that the browser supports, `"text/\*"` and `"image/\*"` could be used, i.e. `"\*"` may appear in place of a subtype. `"\*/\*"` can be used if all files are accepted. On platforms that only use file extensions to describe file types, user agents can match on the extensions `".csv"`, `".svg"`, `".grafr"`, `".graf"` and `".graph"`.
 
-On platforms that only use file extensions to describe file types, user agents can match on the extensions ".csv", ".svg", ".grafr", ".graf" and ".graph".
+After the user [installs](https://w3c.github.io/manifest/#installable-web-applications) Grafr, the user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. 
 
-The user can right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. (This option would only be presented if Grafr has been [installed](https://w3c.github.io/manifest/#installable-web-applications).).
-
-Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`.
-
-To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified.
+Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified. The application will have read access through the [File System Access](https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md) API, but will need to request write access from the user in order to edit the file.
 
 > Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
 
@@ -83,7 +83,7 @@ For more advanced use cases, such as opening a file in an existing window or dis
 
 ### Differences with Similar APIs on the Web
 
-It is worth noting that the proposed method of getting launched files is somewhat different to similar APIs on the web.
+The proposed method of getting launched files differs from some similar web APIs:
 
 - Web Share Target: All relevant data is contained in the POST request to the page
 - registerProtocolHandler: Relevant data is contained in the query string the page navigates to
@@ -92,7 +92,7 @@ In contrast, when we perform a navigation to the file-handling URL, the files ar
 - The page would have to parse file handles from the URL itself, adding boilerplate.
 - Lifetimes for blob-like URLs are complicated, as we can't predict when/where the handle will be used.
 
-In addition, were we designing the existing APIs again today, there is a good change we might take this approach for them too.
+In addition, were we designing the existing APIs again today, there is a good chance we might take this approach for them too.
 
 ### Previous Solutions
 There are a few similar, non-standard APIs, which it may be useful to compare this with.
@@ -158,7 +158,7 @@ function(launchData) {
 
 #### [WinJS File Handlers](https://msdn.microsoft.com/en-us/windows/desktop/hh452684)
 
-The WinJS API is similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, is isn't accessible from the general web.
+The WinJS API is similar to that of Chrome Apps, except that the registration was done in XAML and the name of the event is different. The API is intended to provide file handling integration to UWP Web Apps, available through the Microsoft store. This API is only available in Edge, isn't accessible from the general web.
 
 Example Registration
 ```xml
@@ -205,11 +205,16 @@ There is still a risk that users may unintentionally grant a web application acc
 
 ### Accidental default association
 
-The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. (TODO: Investigate which host OSes exhibit this behavior.) This would mean if the user double-clicks a file of that type, it would automatically open in the registered web app. On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary, to avoid accidentally sending the contents of a file to a web application without the user's consent.
+The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. Currently, this seems to include Windows and Linux. (TODO: Confirm this behavior.) This would mean if the user double-clicks a file of that type, it would automatically open in the registered web app. On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary, to avoid accidentally sending the contents of a file to a web application without the user's consent.
 
 ### Mitigations
 
 The following mitigations are recommended.
-- User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
-- Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
-- A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
+* User agents should not register every site that can handle files as a file handler. Instead, registration should be gated behind installation. Users expect installed applications to be more deeply integrated with the OS. 
+* Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
+* A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
+
+### References:
+* [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
+* Chrome Design Documents:
+  * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws/edit#).
