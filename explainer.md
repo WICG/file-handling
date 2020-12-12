@@ -28,14 +28,14 @@ The following web application declares in its manifest that it can handle CSV an
           "accept": {
             "text/csv": [ ".csv" ]
           },
-          "icon": ["/csvfile.png"]
+          “icons”: [{“src”: “/https://.../csv-file.png”, “sizes”: “256x256”}]
         },
         {
           "action": "/open-svg",
           "accept": {
             "image/svg+xml": ".svg"
           },
-          "icon": ["/svgfile.png"]
+          “icons”: [{“src”: “/https://.../svg-file.png”, “sizes”: “256x256”}]
         },
         {
           "action": "/open-graf",
@@ -44,8 +44,9 @@ The following web application declares in its manifest that it can handle CSV an
               ".grafr", ".graf"
             ],
             "application/vnd.alternative-graph-app.graph": ".graph"
-          },
-          "icon": ["/grapfrfile.png"]
+          }
+          // Icon omitted for the graf type. 
+          // The default web application icon will be used for this file type.
         }
       ]
     }
@@ -56,6 +57,8 @@ The following web application declares in its manifest that it can handle CSV an
 Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types.
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the `"text/csv"`, `"image/svg+xml"`, `"application/vnd.grafr.graph"` and `"application/vnd.alternative-graph-app.graph"` MIME types. If the web application accepts all text and image formats that the browser supports, `"text/\*"` and `"image/\*"` could be used, i.e. `"\*"` may appear in place of a subtype. `"\*/\*"` can be used if all files are accepted. On platforms that only use file extensions to describe file types, user agents can match on the extensions `".csv"`, `".svg"`, `".grafr"`, `".graf"` and `".graph"`.
+
+Icons will be registered for each handler based on the optional `icons` entry, which expects [`ImageResource`](https://www.w3.org/TR/image-resource/)s to specify the images. If an icon is provided in an `icons` entry, that image will be registered in the operating system for that file type. Otherwise, the image registered will be the web application's icon as specified in the manifest.
 
 After the user [installs](https://w3c.github.io/manifest/#installable-web-applications) Grafr, the operating system UX flows, including file managers and "Open with..." dialogs, should list Grafr as an application that may be used to open files of this file type. In this listing, the `"name"`should be listed as an option, to be associated with the registered icon corresponding to this file type. The user can then right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. 
 
