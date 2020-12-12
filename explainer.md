@@ -28,14 +28,24 @@ The following web application declares in its manifest that it can handle CSV an
           "accept": {
             "text/csv": [ ".csv" ]
           },
-          “icons”: [{“src”: “/https://.../csv-file.png”, “sizes”: “256x256”}]
+          "icons": [
+            {
+              "src": “https://*/csv-file.png”,
+              "sizes": "144x144"
+            }
+          ]
         },
         {
           "action": "/open-svg",
           "accept": {
             "image/svg+xml": ".svg"
           },
-          “icons”: [{“src”: “/https://.../svg-file.png”, “sizes”: “256x256”}]
+          "icons": [
+            {
+              "src": “https://*/svg-file.png”,
+              "sizes": "144x144"
+            }
+          ]        
         },
         {
           "action": "/open-graf",
@@ -45,8 +55,6 @@ The following web application declares in its manifest that it can handle CSV an
             ],
             "application/vnd.alternative-graph-app.graph": ".graph"
           }
-          // Icon omitted for the graf type. 
-          // The default web application icon will be used for this file type.
         }
       ]
     }
