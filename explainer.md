@@ -8,7 +8,7 @@ Author:
 This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file using a PWA similar to how it would handle the file using some other associated native app.
 
 This has many use cases. For example:
-* An image editor could display and edit a number of image formats.
+* A document editor could display and edit a number of document formats, like `.txt`, `.md`, `.csv`, and `.docx`.
 * A movie player could play a video format.
 * A Javascript development environment could interactively step through Javascript programs.
 * A data visualizer could generate graphs from .CSV files.
