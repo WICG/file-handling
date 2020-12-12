@@ -1,26 +1,23 @@
 # Explainer
 
-Authors: 
-* Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
-* Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
-* Darwin Huang &lt;<huangdarwin@chromium.org>&gt;<br>
-* Raymes Khoury &lt;<raymes@chromium.org>&gt;
+Author: 
+* Darwin Huang &lt;<huangdarwin@chromium.org>&gt;
 
 ## Motivation
 
-This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file.
+This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file using a PWA similar to how it would handle the file using some other associated native app.
 
 This has many use cases. For example:
 * An image editor could display and edit a number of image formats.
 * A movie player could play a video format.
-* A Javascript environment could interactively step through Javascript programs.
+* A Javascript development environment could interactively step through Javascript programs.
 * A data visualizer could generate graphs from .CSV files.
 
 There has historically been no standards-track API for MIME type handling. For some years, [Chrome packaged apps](https://developer.chrome.com/docs/extensions/apps/) have been able to register one or more file handlers using a [Chrome-specific API](https://developer.chrome.com/apps/manifest/file_handlers) where each handler may handle specific MIME types and/or file extensions. As of August 2018, 619 file handlers handled MIME types, while 509 file handlers handled file extensions. Some packaged apps had more than one file handler. Overall, 580 packaged apps handled MIME types and 337 packaged apps handled file extensions. This usage, and the use cases above, demonstrates the value of being able to associate web applications with MIME types and/or file extensions.
 
 ## Example
 
-The following web application declares in its manifest that it can handle CSV and SVG files, as well as a hypothetical GRAF file format that may be custom-designed for this application.
+The following web application declares in its manifest that it can handle CSV and SVG files, as well as a hypothetical file format that this application uses called GRAF.
 
 ```json
     {
@@ -82,7 +79,7 @@ if ('launchQueue' in window) {
 ```
 An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
 
-When the user uninstalls this web application, registered file handles and icons will be properly uninstalled as well.
+When the user uninstalls this web application, registered file handlers and icons will be properly uninstalled as well.
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
@@ -219,7 +216,11 @@ The following mitigations are recommended.
 * Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
 * A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
 
-## References:
+## References and Acknowledgements:
+* Former editors:
+  * Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
+  * Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
+  * Raymes Khoury &lt;<raymes@chromium.org>&gt;
 * [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
 * Chrome Design Documents:
   * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws/edit#).
