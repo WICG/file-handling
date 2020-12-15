@@ -1,7 +1,12 @@
 # Explainer
 
-Author: 
-* Darwin Huang &lt;<huangdarwin@chromium.org>&gt;
+Authors: 
+* Current:
+  * Darwin Huang &lt;<huangdarwin@chromium.org>&gt;
+* Former:
+  * Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
+  * Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
+  * Raymes Khoury &lt;<raymes@chromium.org>&gt;
 
 ## Motivation
 
@@ -30,7 +35,7 @@ The following web application declares in its manifest that it can handle CSV an
           },
           "icons": [
             {
-              "src": “https://*/csv-file.png”,
+              "src": "/csv-file.png",
               "sizes": "144x144"
             }
           ]
@@ -42,7 +47,7 @@ The following web application declares in its manifest that it can handle CSV an
           },
           "icons": [
             {
-              "src": “https://*/svg-file.png”,
+              "src": "/svg-file.png",
               "sizes": "144x144"
             }
           ]        
@@ -227,11 +232,7 @@ The following mitigations are recommended.
 * Users agents should not register web applications as the default file handler for any file type without explicit user confirmation.
 * A permissions prompt should be displayed before registering a web application as the default handler for a type where that registration would otherwise happen without the user's intervention (such as in the situation discussed above). Alternatively, a permissions prompt could be displayed the first time (or every time) the user opens a file with the automatically-registered default handler.
 
-## References and Acknowledgements:
-* Former editors:
-  * Eric Willigers &lt;<ericwilligers@chromium.org>&gt;<br>
-  * Jay Harris &lt;<harrisjay@chromium.org>&gt;<br>
-  * Raymes Khoury &lt;<raymes@chromium.org>&gt;
+## References:
 * [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
 * Chrome Design Documents:
   * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws/edit#).
