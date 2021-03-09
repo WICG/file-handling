@@ -30,7 +30,7 @@ The following web application declares in its manifest that it can handle CSV an
       "file_handlers": [
         {
           "action": "/open-csv",
-          "name": "Comma Separated Value",
+          "name": "Comma-separated Value",
           "accept": {
             "text/csv": [ ".csv" ]
           },
@@ -56,7 +56,7 @@ The following web application declares in its manifest that it can handle CSV an
         },
         {
           "action": "/open-graf",
-          "name": "Grapfr",
+          "name": "Grafr",
           "accept": {
             "application/vnd.grafr.graph": [
               ".grafr", ".graf"
