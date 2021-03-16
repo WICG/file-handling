@@ -32,7 +32,7 @@ The following web application declares in its manifest that it can handle CSV an
           "action": "/open-csv",
           "name": "Comma-separated Value",
           "accept": {
-            "text/csv": [ ".csv" ]
+            "text/csv": [".csv"]
           },
           "icons": [
             {
