@@ -45,7 +45,7 @@ The following web application declares in its manifest that it can handle CSV an
           "action": "/open-svg",
           "name": "Image",
           "accept": {
-            "image/svg+xml": ".svg"
+            "image/svg+xml": [".svg"]
           },
           "icons": [
             {
@@ -61,7 +61,7 @@ The following web application declares in its manifest that it can handle CSV an
             "application/vnd.grafr.graph": [
               ".grafr", ".graf"
             ],
-            "application/vnd.alternative-graph-app.graph": ".graph"
+            "application/vnd.alternative-graph-app.graph": [".graph"]
           }
         }
       ]
