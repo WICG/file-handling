@@ -10,7 +10,7 @@ Authors:
 
 ## Motivation
 
-This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other native UX to select a PWA to handle the file using a PWA similar to how it would handle the file using some other associated native app.
+This proposal gives installed web applications a way to register their ability to handle (read, stream, edit) files with given MIME types and/or file extensions. This then allows an operating system's file manager or other operating system flows to select a PWA to handle the file using a PWA, similar to how it would handle the file using some other associated installed app.
 
 This has many use cases. For example:
 * A document editor could display and edit a number of document formats, like `.txt`, `.md`, `.csv`, and `.docx`.
@@ -92,7 +92,7 @@ if ('launchQueue' in window) {
 
     const fileHandle = launchParams.files[0];
     // Handle the file:
-    // https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#example-code
+    // https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md#example-code
   });
 }
 ```
@@ -137,7 +137,7 @@ Presumably this API provided readonly access to the file.
 `registerContentHandler` was not designed to handle files being opened, rather it was designed to handle link clicks that resolve to certain mime types (see [Example 17](https://www.w3.org/TR/html52/webappapis.html#custom-scheme-and-content-handlers-the-registerprotocolhandler-and-registercontenthandler-methods) from the spec).
 
 For Example:
-1. It requires file handles to be encodable as a string (this will not be possible with the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API, which is required to write to files).
+1. It requires file handles to be encodable as a string (this will not be possible with the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md) API, which is required to write to files).
 2. It can only register handlers for content types. This is a problem because some operating systems only support file extensions and we don't want to spec and maintain a mapping. See this [issue](https://github.com/WICG/web-share-target/issues/74) for more context.
 
 ### [Chrome Apps File Handlers](https://developer.chrome.com/apps/manifest/file_handlers)
@@ -218,9 +218,9 @@ function onActivatedHandler(eventArgs) {
 
 # Security and Privacy Considerations
 
-There is a large category of attack vectors that are opened up by allowing websites access to native files. These are dealt with in the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md#proposed-security-models) explainer.
+There is a large category of attack vectors that are opened up by allowing websites access to files. These are dealt with in the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md#proposed-security-models) explainer.
 
-The additional security-pertinent capability that this specification provides over the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) API is the ability to grant access to certain files through the native operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the native operating system.
+The additional security-pertinent capability that this specification provides over the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md#proposed-security-models) API is the ability to grant access to certain files through the operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the operating system.
 
 There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a sufficient signal of trust in the application.
 
