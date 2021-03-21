@@ -30,7 +30,6 @@ The following web application declares in its manifest that it can handle CSV an
       "file_handlers": [
         {
           "action": "/open-csv",
-          "name": "Comma-separated Value",
           "accept": {
             "text/csv": [ ".csv" ]
           },
@@ -43,7 +42,6 @@ The following web application declares in its manifest that it can handle CSV an
         },
         {
           "action": "/open-svg",
-          "name": "Image",
           "accept": {
             "image/svg+xml": ".svg"
           },
@@ -56,7 +54,6 @@ The following web application declares in its manifest that it can handle CSV an
         },
         {
           "action": "/open-graf",
-          "name": "Grafr",
           "accept": {
             "application/vnd.grafr.graph": [
               ".grafr", ".graf"
@@ -76,7 +73,7 @@ On a system that does not use file extensions but associates files with MIME typ
 
 Icons will be registered for each handler based on the optional `icons` entry, which expects [`ImageResource`](https://www.w3.org/TR/image-resource/)s to specify the images. If an icon is provided in an `icons` entry, that image will be registered in the operating system for that file type. Otherwise, the image registered will be the web application's icon as specified in the manifest.
 
-After the user [installs](https://w3c.github.io/manifest/#installable-web-applications) Grafr, the operating system UX flows, including file managers and "Open with..." dialogs, should list Grafr as an application that may be used to open files of this file type. In this listing, the `"name"`should be listed as an option, to be associated with the registered icon corresponding to this file type. The user can then right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. 
+After the user [installs](https://w3c.github.io/manifest/#installable-web-applications) Grafr, the operating system UX flows, including file managers and "Open with..." dialogs, should list Grafr as an application that may be used to open files of this file type. The user can then right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. 
 
 Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified. The application will have read access through the [File System Access](https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md) API, but will need to request write access from the user in order to edit the file.
 
