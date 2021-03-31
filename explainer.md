@@ -102,6 +102,10 @@ When the user uninstalls this web application, registered file handlers and icon
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
+## Permissions API Integration
+
+A `"file-handling"` permission will be defined to protect the user from accidentally allowing a PWA to view files. This permission prompt may asynchronously show right after the user chooses to use a PWA to open a file of any of the file types the PWA tries to associate with, so that the permission context is more understandable and relevant. This permission prompt should also show after the PWA has had an opportunity to load. The prompt should clearly show the PWA's origin, so that the identity of the PWA requesting file read access for the handled file is clear to the user. Launched files should only be queued into the `launchQueue` after the user accepts the permission and allows the PWA to handle the relevant file types. User agents may retain control over default settings and how (or if) they are exposed to the user.
+
 ## Differences with Similar APIs on the Web
 
 The proposed method of getting launched files differs from some similar web APIs:
@@ -172,7 +176,7 @@ Example Handler
 function(launchData) {
   if (launchData.source !== 'file_handler') return;
 
-  // TODO File handling
+  // File handling integration here.
   // launchData.items[0] is the first file.
 }
 ```
@@ -209,7 +213,7 @@ Example Handler
 function onActivatedHandler(eventArgs) { 
     if (eventArgs.detail.kind !== Windows.ApplicationModel.Activation.ActivationKind.file)  
       return;
-    // TODO: Handle file activation. 
+    // Handle file activation here. 
 
     // The number of files received is eventArgs.detail.files.size 
     // The first file is eventArgs.detail.files[0] 
@@ -222,11 +226,11 @@ There is a large category of attack vectors that are opened up by allowing websi
 
 The additional security-pertinent capability that this specification provides over the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md#proposed-security-models) API is the ability to grant access to certain files through the operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker will also be applied to the files and folders opened via the operating system.
 
-There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a sufficient signal of trust in the application.
+There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a signal of trust in the application. In conjunction with a permission prompt, this can be viewed as sufficient trust to let the web application view the file.
 
 ### Accidental default association
 
-The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. Currently, this seems to include Windows and Linux. (TODO: Confirm this behavior.) This would mean if the user double-clicks a file of that type, it would automatically open in the registered web app. On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary, to avoid accidentally sending the contents of a file to a web application without the user's consent.
+The exception to this is where there are no existing applications installed on the host operating system capable of handling a given file type. In this case, some host OSes may automatically promote the newly registered handler to become the default handler for that file type, silently and without any intervention by the user. Currently, this can occur in all desktop OSes. This would mean if the user double-clicks a file of that type, it would automatically open in the registered web app. On such host OSes, when the user agent determines that there is no existing default handler for the file type, an explicit permission prompt might be necessary, to avoid accidentally sending the contents of a file to a web application without the user's consent.
 
 ### Mitigations
 
