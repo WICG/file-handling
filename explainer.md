@@ -120,7 +120,7 @@ if ('launchQueue' in window) {
 ```
 An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
 
-The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
+The `launchParams` property API design is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer issue.
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
