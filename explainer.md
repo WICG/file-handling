@@ -104,7 +104,7 @@ callback LaunchConsumer = any (LaunchParams params);
 };
 ```
 
-Below is a basic example using `launchQueue` and `launchParams` to recieve the file handles.
+Below is a basic example of using `launchQueue` and `launchParams` to receive the file handles.
 ```js
 // In grafr.com/open-csv
 if ('launchQueue' in window) {
