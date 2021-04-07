@@ -78,15 +78,33 @@ Icons will be registered for each handler based on the optional `icons` entry, w
 
 After the user [installs](https://w3c.github.io/manifest/#installable-web-applications) Grafr, the operating system UX flows, including file managers and "Open with..." dialogs, should list Grafr as an application that may be used to open files of this file type. In this listing, the `"name"`should be listed as an option, to be associated with the registered icon corresponding to this file type. The user can then right click on CSV or SVG files in the operating system's file browser, and choose to open the files with the Grafr web application. When the user uninstalls this web application, registered file handlers and icons will be properly uninstalled as well.
 
-Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. 
-
 ## Launch
 
-To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified. The application will have read access through the [File System Access](https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md) API, but will need to request write access from the user in order to edit the file.
+Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. 
 
-> Note: The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
+To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified. The application will have read access through the [File System Access](https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md) API, but will need to separately request write access from the user to edit the file.
 
-Below is a basic example receiving the file handles.
+`launchQueue`, `launchParams`, and the DOM Window they're used on, are specified as follows:
+```
+// DOM Window Launch Queue.
+partial interface Window {
+    readonly attribute LaunchQueue launchQueue;
+};
+
+// Launch Queue.
+[Exposed=Window] interface LaunchQueue {
+  void setConsumer(LaunchConsumer consumer);
+};
+
+callback LaunchConsumer = any (LaunchParams params);
+
+// Launch Params.
+[Exposed=Window] interface LaunchParams {
+  readonly attribute FrozenArray<FileSystemHandle> files;
+};
+```
+
+Below is a basic example using `launchQueue` and `launchParams` to recieve the file handles.
 ```js
 // In grafr.com/open-csv
 if ('launchQueue' in window) {
@@ -101,6 +119,8 @@ if ('launchQueue' in window) {
 }
 ```
 An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
+
+The `launchParams` property is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer.
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
