@@ -75,7 +75,7 @@ The new manifest API surface is contained in the `file_handlers` list, where eac
 
 `action` must be inside the app scope, and specifies the URL after the origin, later navigated to in the launch event.
 
-Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types. 
+Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types.
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the `"text/csv"`, `"image/svg+xml"`, `"application/vnd.grafr.graph"` and `"application/vnd.alternative-graph-app.graph"` MIME types. If the web application accepts all text and image formats that the browser supports, `"text/*"` and `"image/*"` could be used, i.e. `"*"` may appear in place of a subtype. `"*/*"` can be used if all files are accepted. On platforms that only use file extensions to describe file types, user agents can match on the extensions `".csv"`, `".svg"`, `".grafr"`, `".graf"` and `".graph"`.
 
@@ -85,7 +85,7 @@ After the user [installs](https://w3c.github.io/manifest/#installable-web-applic
 
 ## Launch
 
-Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`. 
+Choosing to open the file would create a new top level browsing context, navigating to the `action` URL (resolved against the manifest URL). Assuming the user opened `graph.csv` in Grafr the URL would be `https://grafr.com/open-csv/`.
 
 To access launched files, a site should specify a consumer for a `launchQueue` object attached to `window`. Launches are queued until they are handled by this consumer, which is invoked exactly once for each launch. In this manner, we can ensure every launch is handled, regardless of when the consumer was specified. The application will have read access through the [File System Access](https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md) API, but will need to separately request write access from the user to edit the file.
 
