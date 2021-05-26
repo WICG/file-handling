@@ -20,7 +20,9 @@ This has many use cases. For example:
 
 There has historically been no standards-track API for MIME type handling. For some years, [Chrome packaged apps](https://developer.chrome.com/docs/extensions/apps/) have been able to register one or more file handlers using a [Chrome-specific API](https://developer.chrome.com/apps/manifest/file_handlers) where each handler may handle specific MIME types and/or file extensions. As of August 2018, 619 file handlers handled MIME types, while 509 file handlers handled file extensions. Some packaged apps had more than one file handler. Overall, 580 packaged apps handled MIME types and 337 packaged apps handled file extensions. This usage, and the use cases above, demonstrates the value of being able to associate web applications with MIME types and/or file extensions.
 
-## Example
+This will be implemented by a new `"file_handlers"` manifest entry, which specifies file handlers to register onto the target system, as well as a new `window.launchQueue` method, that enables the opened page to handle files queued by the underlying operating system.
+
+## Example Manifest
 
 The following web application declares in its manifest that it can handle CSV and SVG files, as well as a hypothetical file format that this application uses called GRAF.
 
@@ -67,10 +69,13 @@ The following web application declares in its manifest that it can handle CSV an
       ]
     }
 ```
+## Manifest
 
-> Note: `action` must be inside the app scope.
+The new manifest API surface is contained in the `file_handlers` list, where each entry in this list is a dictionary describing the file handler, with fields like `action`, `name`, `accept`, and `icons`.
 
-Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types.
+`action` must be inside the app scope, and specifies the URL after the origin, later navigated to in the launch event.
+
+Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types. 
 
 On a system that does not use file extensions but associates files with MIME types, user agents can match on the `"text/csv"`, `"image/svg+xml"`, `"application/vnd.grafr.graph"` and `"application/vnd.alternative-graph-app.graph"` MIME types. If the web application accepts all text and image formats that the browser supports, `"text/*"` and `"image/*"` could be used, i.e. `"*"` may appear in place of a subtype. `"*/*"` can be used if all files are accepted. On platforms that only use file extensions to describe file types, user agents can match on the extensions `".csv"`, `".svg"`, `".grafr"`, `".graf"` and `".graph"`.
 
