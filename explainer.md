@@ -255,7 +255,7 @@ The additional security-pertinent capability that this specification provides ov
 
 There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a signal of trust in the application. In conjunction with a permission prompt, this can be viewed as sufficient trust to let the web application view the file.
 
-More details are also available in the [Security and Privacy Questionairre](https://github.com/WICG/file-handling/blob/main/PRIVACY_AND_SECURITY.md)
+More details are also available in the [Security and Privacy Questionnaire](https://github.com/WICG/file-handling/blob/main/PRIVACY_AND_SECURITY.md)
 
 ### Accidental default association
 
@@ -271,6 +271,6 @@ The following mitigations are recommended.
 ## References:
 * [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
 * Chrome Design Documents:
-  * [File Handling design document](https://tinyurl.com/file-handling-design)
+  * [File Handling design document](https://docs.google.com/document/d/1SpLwK0sQ3CUuuG-T9pFBqlm1Ae-OGwi4MsP5X2bCBow/)
   * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws).
   * [File Handling Security Model](https://docs.google.com/document/d/1pTTO5MTSlxuqxpWL3pFblKB8y8SR0jPao8uAjJSUTp4).
