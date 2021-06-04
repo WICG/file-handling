@@ -73,7 +73,7 @@ The following web application declares in its manifest that it can handle CSV an
 
 The new manifest API surface is contained in the `file_handlers` list, where each entry in this list is a dictionary describing the file handler, with fields like `action`, `name`, `accept`, and `icons`.
 
-`action` must be inside the app scope, and specifies the URL after the origin, later navigated to in the launch event.
+`action` must be inside the app scope, and specifies the URL after the origin, later navigated to in the launch event when handling a file.
 
 Each `accept` entry is a dictionary mapping MIME types to extensions. This ensures applications will work on operating systems that only support one of the two (example: Linux, which [only supports MIME types](https://stackoverflow.com/a/31836/3260044)). This also allows applications to register custom file types.
 
@@ -125,7 +125,7 @@ if ('launchQueue' in window) {
 ```
 An application could then choose to handle these files however it chose. For example, it could save the file handle to disk and create a URL to address the launched file, allowing users to navigate back to a file.
 
-The `launchParams` property API design is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/issues/20) explainer issue.
+The `launchParams` property API design is discussed in more detail in the [Launch Events](https://github.com/WICG/sw-launch/blob/main/explainer.md) explainer [issue](https://github.com/WICG/sw-launch/issues/20).
 
 For more advanced use cases, such as opening a file in an existing window or displaying a notification, applications can add a [launch event handler](https://github.com/WICG/sw-launch/blob/master/explainer.md).
 
@@ -251,9 +251,11 @@ function onActivatedHandler(eventArgs) {
 
 There is a large category of attack vectors that are opened up by allowing websites access to files. These are dealt with in the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md#proposed-security-models) explainer.
 
-The additional security-pertinent capability that this specification provides over the [file-system-access](https://github.com/WICG/file-system-access/blob/main/EXPLAINER.md#proposed-security-models) API is the ability to grant access to certain files through the operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker may also be applied to the files and folders opened via the operating system.
+The additional security-pertinent capability that this specification provides over the file-system-access API is the ability to grant access to certain files through the operating system UI, as opposed to through a file picker shown by a web application. Any restrictions as to the files and folders that can be opened via the picker may also be applied to the files and folders opened via the operating system.
 
 There is still a risk that users may unintentionally grant a web application access to a file by opening it. However, it is generally understood that opening a file allows the application it is opened with to read and/or manipulate that file. Therefore, a user's explicit choice to open a file in an installed application, such as via an “Open with...” context menu, can be read as a signal of trust in the application. In conjunction with a permission prompt, this can be viewed as sufficient trust to let the web application view the file.
+
+More details are also available in the [Security and Privacy Questionnaire](https://github.com/WICG/file-handling/blob/main/PRIVACY_AND_SECURITY.md)
 
 ### Accidental default association
 
@@ -269,5 +271,6 @@ The following mitigations are recommended.
 ## References:
 * [Ballista (earlier, related proposal) explainer](https://github.com/chromium/ballista/blob/master/docs/explainer.md).
 * Chrome Design Documents:
+  * [File Handling design document](https://docs.google.com/document/d/1SpLwK0sQ3CUuuG-T9pFBqlm1Ae-OGwi4MsP5X2bCBow/)
   * [File Handling Icons design document](https://docs.google.com/document/d/1OAkCvMwTVAf5KuHHDgAeCA3YwcTg_XmujZ7ENYq01ws).
   * [File Handling Security Model](https://docs.google.com/document/d/1pTTO5MTSlxuqxpWL3pFblKB8y8SR0jPao8uAjJSUTp4).
