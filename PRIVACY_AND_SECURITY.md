@@ -2,12 +2,12 @@
 
 ### 3.1 Does this specification deal with personally-identifiable information?
 
-No (though it is conceivable that a user could open sensitive information in a web app, perhaps editing their tax return in a web app made for that prupose).
+Indirectly: it is conceivable that a user could open sensitive information in a web app, perhaps editing their tax return in a web app made for that purpose.
 
 
 ### 3.2 Does this specification deal with high-value data?
 
-Yes. It will grant read (and possibly write) access to some of a user's files (if they choose to open them with a PWA). 
+Yes. It will grant read and write access to some of a user's files (if they choose to open them with a PWA).
 
 
 ### 3.3 Does this specification introduce new state for an origin that persists across browsing sessions?
@@ -17,7 +17,7 @@ No.
 
 ### 3.4 Does this specification expose persistent, cross-origin state to the web?
 
-Yes, in the form of access to the native file system. Note, however, that the user must have both origins installed as PWAs and must **explicitly** open the same file with both web apps.
+Yes, in the form of the contents of the native file system. Note, however, that the user must have both origins installed as PWAs and must **explicitly** open the same file with both web apps.
 
 ### 3.5 Does this specification expose any other data to an origin that it doesn’t currently have access to?
 
@@ -52,7 +52,7 @@ No.
 
 ### 3.11 Does this specification allow an origin some measure of control over a user agent’s native UI?
 
-No.
+No, however it does allow an installed app some measure of control over operating system native UI.
 
 
 ### 3.12 Does this specification expose temporary identifiers to the web?
@@ -72,7 +72,7 @@ Sites may not be registered as a file handler unless they are installed, which i
 
 ### 3.15 Does this specification persist data to a user’s local device?
 
-Not directly, but once a site has been granted write access to a file it may persist data. The duration of access to files is undecided but we will defer to what is decided by the [native-file-system](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md) folks.
+Not directly, but once a site has been granted write access to a file it may persist data. The duration of access to files is controlled by the [File System Access API](https://github.com/WICG/native-file-system/blob/master/EXPLAINER.md).
 
 
 ### 3.16 Does this specification have a "Security Considerations" and "Privacy Considerations" section?
