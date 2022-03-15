@@ -66,7 +66,8 @@ The following web application declares in its manifest that it can handle CSV an
               ".grafr", ".graf"
             ],
             "application/vnd.alternative-graph-app.graph": ".graph"
-          }
+          },
+          "launch_type": "multiple-clients"
         }
       ]
     }
@@ -75,7 +76,7 @@ The following web application declares in its manifest that it can handle CSV an
 
 The new manifest API surface is contained in the `file_handlers` list, where each entry in this list is a dictionary describing the file handler, with fields like `action`, `name`, `accept`, and `icons`.
 
-`action` must be inside the app scope, and specifies the URL after the origin that is the navigation destination for file handling launches (analogous to `start_url` for typical app launches).
+`action` must be inside the app scope, and specifies the URL after the origin that is the navigation destination for file handling launches (analogous to `start_url` for typical app launches). `launch_type` defines whether multiple files should be opened in a single client or multiple. If omitted, this defaults to `single-client`. See also `launchParams.files`. It is not possible to coalesce multiple files that match different file handler entries into a single launch.
 
 Each `accept` entry is a dictionary mapping MIME types to extensions. Depending on context, both MIME type and file extension may be important. For example, `xdg-utils` on Linux [associates files to apps via MIME types](https://stackoverflow.com/a/31836/3260044), and thus (a) will match files to apps based on MIME type, and (b) requires all file extensions to map to a known MIME type (custom file formats like the `.grafr` example need a MIME type). Other systems map directly from file extension to app. For consistency across platforms, the user agent will enforce that the app can only open files with specified extensions. App authors should expect that both the MIME type *and* file extension must match for a file to be openable by an app.
 
@@ -101,7 +102,7 @@ if ('launchQueue' in window) {
   });
 }
 ```
-An application could then choose to handle these files however it chose. For example, it could open the file contents in an editor and allow saving edits back to disk.
+Note that if the user opens multiple files, and the file handler has been notated with `multiple-clients` as its `launch_type`, the files array will always have just one element. This can be useful, for example, if an editing app wishes to make use of the browser's tabbing via `"display_mode": "browser"` rather building its own way of simultaneously displaying or opening multiple documents. On the other hand, a zip archiving app would likely prefer the files all be passed to a single client, so would not set `launch_type`.
 
 # Security and Privacy Considerations
 
