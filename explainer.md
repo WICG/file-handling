@@ -102,6 +102,7 @@ if ('launchQueue' in window) {
   });
 }
 ```
+
 Note that if the user opens multiple files, and the file handler has been notated with `multiple-clients` as its `launch_type`, the files array will always have just one element. This can be useful, for example, if an editing app wishes to make use of the browser's tabbing via `"display_mode": "browser"` rather building its own way of simultaneously displaying or opening multiple documents. On the other hand, a zip archiving app would likely prefer the files all be passed to a single client, so would not set `launch_type`. Note that this applies separately to each `file_handlers` entry. It is not possible to coalesce multiple files that match different `file_handler` entries into a single launch.
 
 # Security and Privacy Considerations
